@@ -15,10 +15,14 @@
 ## 📸 Screenshots
 
 ### 1. MS Teams Alert
-*(여기에 팀즈로 알람 온 캡처 이미지를 넣어주세요. 예: `![Teams Alert](./docs/teams-alert.png)`)*
+
+<img width="311" height="623" alt="image" src="https://github.com/user-attachments/assets/43a93c4a-0ca9-4dee-8356-20d4a2c9cec3" />
+
 
 ### 2. Premium Web Dashboard
-*(여기에 웹페이지 전체 화면 캡처 이미지를 넣어주세요. 예: `![Web Dashboard](./docs/web-dashboard.png)`)*
+
+<img width="436" height="803" alt="image" src="https://github.com/user-attachments/assets/79fcc5fd-976a-4b6f-8c16-da416655f46b" />
+
 
 <br>
 
