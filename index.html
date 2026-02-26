@@ -7,77 +7,92 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        body { background-color: #f4f6f9; font-family: 'Pretendard', sans-serif; color: #111827; }
-        .container { max-width: 900px; }
-        .header-title { font-weight: 800; letter-spacing: -0.5px; color: #1f2937; }
-        .cover-img-container { background: white; border-radius: 16px; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
-        .cover-img { width: 100%; max-height: 450px; object-fit: cover; border-radius: 12px; }
-        .card { border: none; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
-        .card-header { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border-radius: 16px 16px 0 0 !important; padding: 20px; font-size: 1.2rem; }
-        .summary-list { padding-left: 0; list-style: none; }
-        .summary-list li { position: relative; padding-left: 24px; margin-bottom: 16px; font-size: 1.05rem; line-height: 1.7; color: #374151; }
-        .summary-list li::before { content: "✨"; position: absolute; left: 0; top: 0; font-size: 1.1rem; }
-        strong { color: #2563eb; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
-        .index-card { background: white; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s; }
-        .index-card:hover { transform: translateY(-5px); }
-        .index-title { font-size: 0.85rem; font-weight: 600; color: #6b7280; letter-spacing: 1px; margin-bottom: 8px; }
-        .index-value { font-size: 1.75rem; font-weight: 800; color: #111827; }
+        body { background-color: #f3f4f6; font-family: 'Pretendard', sans-serif; color: #111827; }
+        .container { max-width: 850px; padding-top: 3rem; padding-bottom: 3rem; }
+        .header-title { font-weight: 800; font-size: 2.2rem; letter-spacing: -0.5px; color: #1f2937; }
+        
+        .index-card { background: #ffffff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f3f4f6; }
+        .index-title { font-size: 0.9rem; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .index-value { font-size: 1.6rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+        .index-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; background-color: #f3f4f6; }
+        
+        /* [핵심 수정] object-fit과 max-height를 없애서 1024x1024 원본 전체가 나오게 함 */
+        .cover-img-container { background: #ffffff; border-radius: 24px; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 2rem; }
+        .cover-img { width: 100%; height: auto; border-radius: 16px; display: block; }
+        
+        .summary-card { background: #ffffff; border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); overflow: hidden; }
+        .summary-header { background: #111827; color: #ffffff; padding: 20px 24px; font-size: 1.25rem; font-weight: 700; }
+        .summary-body { padding: 32px 24px; }
+        
+        .summary-list { padding-left: 0; list-style: none; margin: 0; }
+        .summary-list li { position: relative; padding-left: 28px; margin-bottom: 20px; font-size: 1.05rem; line-height: 1.7; color: #374151; }
+        .summary-list li:last-child { margin-bottom: 0; }
+        .summary-list li::before { content: "🔥"; position: absolute; left: 0; top: 2px; font-size: 1.1rem; }
+        strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
     </style>
 </head>
 <body>
-    <div class="container py-5">
+    <div class="container">
         <div class="text-center mb-5">
             <h1 class="header-title mb-2">Evening Briefing: 오늘 국장 마감 & 미장 프리뷰</h1>
-            <p class="text-muted">업데이트: 2026-02-26 14:07:07</p>
+            <p class="text-muted">마지막 업데이트: 2026-02-26 14:19:27</p>
         </div>
         
         <div class="row g-3 mb-5">
             <div class="col-6 col-md-3">
                 <div class="index-card">
                     <div class="index-title">KOSPI</div>
-                    <div class="index-value">6,221.94</div>
+                    <div class="index-value">6,213.11</div>
+                    <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 129.25 (+2.12%)</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="index-card">
                     <div class="index-title">KOSDAQ</div>
-                    <div class="index-value">1,189.69</div>
+                    <div class="index-value">1,188.81</div>
+                    <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 23.56 (+2.02%)</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="index-card">
                     <div class="index-title">S&P 500</div>
                     <div class="index-value">6,946.13</div>
+                    <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 56.06 (+0.81%)</div>
                 </div>
             </div>
             <div class="col-6 col-md-3">
                 <div class="index-card">
                     <div class="index-title">DOW JONES</div>
                     <div class="index-value">49,482.15</div>
+                    <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 307.65 (+0.63%)</div>
                 </div>
             </div>
         </div>
 
-        <div class="mb-5 cover-img-container">
-            <img src="cover.png" class="cover-img">
+        <div class="cover-img-container">
+            <img src="cover.png" class="cover-img" alt="Market Illustration">
         </div>
 
-        <div class="card mb-5">
-            <div class="card-header fw-bold">
-                🔥 코스피 하락, 투자 신뢰 위기
+        <div class="summary-card">
+            <div class="summary-header">
+                📰 코스피 2% 상승 기쁨
             </div>
-            <div class="card-body p-4">
+            <div class="summary-body">
                 <ul class="summary-list">
                     
-                    <li>현재 코스피는 <strong>6221.94</strong>로, 전일 대비 <strong>-0.24%</strong> 하락하며 마감했다. 이러한 하락세는 글로벌 경제 불확실성과 함께 주요 기업 실적이 예상치에 미치지 못한 것이 주된 원인이다.</li>
+                    <li>오늘 한국 시장은 <strong>코스피</strong>와 <strong>코스닥</strong> 모두 상승세를 보이며 긍정적인 분위기를 이어갔습니다.</li>
                     
-                    <li>코스닥은 <strong>1189.69</strong>로, <strong>-0.45%</strong> 하락하며 투자자 신뢰가 약화된 상황을 반영하고 있으며, 특히 IT 및 바이오주에서 급락이 두드러졌다.</li>
+                    <li>특히, <strong>코스피</strong>는 6,213.11로 마감하면서 2.12% 상승한 점이 주목받고 있습니다.</li>
                     
-                    <li>미국 S&P500 지수는 <strong>6946.13</strong>로 <strong>+0.12%</strong> 상승하며 기술주 중심의 반등세를 보였지만, 여전히 하반기 금리 인상 우려가 시장에 남아있어 변동성이 클 것으로 예상된다.</li>
+                    <li>코스닥**도 1,188.81에 도달하며 2.02%의 상승률을 기록, 투자자들의 관심을 끌었습니다.</li>
                     
-                    <li>다우존스는 <strong>49482.15</strong>로, <strong>0.16%</strong> 증가했지만 전일의 상승세를 이어가기는 어려워 보이며 특히 <strong>에너지</strong>와 <strong>유통</strong> 부문이 시장을 이끌었다.</li>
+                    <li>오늘 상승의 주된 원인은 <strong>글로벌 증시</strong>의 회복세와 <strong>외국인 투자자</strong>의 <strong>한국 증시</strong> 매수 강화로 분석됩니다.</li>
                     
-                    <li>미국 시장은 오늘 밤 FOMC 회의와 관련된 <strong>금리 정책</strong>에 대한 발언이 주목받을 것으로, 투자자들은 경제 성장과 인플레이션 상황을 주의 깊게 관찰해야 할 것이다.</li>
+                    <li>미국 시장에서는 <strong>S&P500</strong>과 <strong>다우존스</strong>가 각각 0.81%와 0.63% 상승하며, <strong>내일 한국 시장에도 긍정적 영향을 미칠</strong> 것으로 기대됩니다.</li>
+                    
+                    <li>현재 국제 유가 상승과 <strong>금리 동결</strong> 전망이 지속되고 있어 내일 한국 시장 역시 안정적인 흐름을 이어갈 가능성이 높습니다.</li>
+                    
+                    <li>오늘 밤 미국 시장에서는 <strong>기업 실적 발표</strong>와 <strong>경제 지표</strong> 발표에 대한 시장 반응이 주목받을 것으로 예상됩니다.</li>
                     
                 </ul>
             </div>
