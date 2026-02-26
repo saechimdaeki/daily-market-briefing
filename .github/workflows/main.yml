@@ -2,12 +2,9 @@ name: Daily Market Briefing Automation
 
 on:
   schedule:
-
     - cron: '30 22 * * 0-4'
-    
     - cron: '30 09 * * 1-5'
-    
-  workflow_dispatch: # 수동 실행 버튼
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -29,7 +26,8 @@ jobs:
 
       - name: 브리핑 에이전트 실행
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: python main.py
 
       - name: GitHub Pages 배포
