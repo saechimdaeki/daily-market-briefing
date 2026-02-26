@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Market Briefing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { background-color: #f4f6f9; font-family: 'Pretendard', sans-serif; color: #111827; }
+        .container { max-width: 900px; }
+        .header-title { font-weight: 800; letter-spacing: -0.5px; color: #1f2937; }
+        .cover-img-container { background: white; border-radius: 16px; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .cover-img { width: 100%; max-height: 450px; object-fit: cover; border-radius: 12px; }
+        .card { border: none; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .card-header { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border-radius: 16px 16px 0 0 !important; padding: 20px; font-size: 1.2rem; }
+        .summary-list { padding-left: 0; list-style: none; }
+        .summary-list li { position: relative; padding-left: 24px; margin-bottom: 16px; font-size: 1.05rem; line-height: 1.7; color: #374151; }
+        .summary-list li::before { content: "✨"; position: absolute; left: 0; top: 0; font-size: 1.1rem; }
+        strong { color: #2563eb; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
+        .index-card { background: white; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s; }
+        .index-card:hover { transform: translateY(-5px); }
+        .index-title { font-size: 0.85rem; font-weight: 600; color: #6b7280; letter-spacing: 1px; margin-bottom: 8px; }
+        .index-value { font-size: 1.75rem; font-weight: 800; color: #111827; }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="header-title mb-2">Evening Briefing: 오늘 국장 마감 & 미장 프리뷰</h1>
+            <p class="text-muted">업데이트: 2026-02-26 14:01:46</p>
+        </div>
+        
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-md-3">
+                <div class="index-card">
+                    <div class="index-title">KOSPI</div>
+                    <div class="index-value">6,219.84</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="index-card">
+                    <div class="index-title">KOSDAQ</div>
+                    <div class="index-value">1,188.47</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="index-card">
+                    <div class="index-title">S&P 500</div>
+                    <div class="index-value">6,946.13</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="index-card">
+                    <div class="index-title">DOW JONES</div>
+                    <div class="index-value">49,482.15</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-5 cover-img-container">
+            <img src="cover.png" class="cover-img">
+        </div>
+
+        <div class="card mb-5">
+            <div class="card-header fw-bold">
+                🔥 코스피 상승, 코스닥 하락
+            </div>
+            <div class="card-body p-4">
+                <ul class="summary-list">
+                    
+                    <li>오늘 한국 시장에서는 <strong>코스피</strong>가 6219.84로 <strong>0.48% 상승</strong>하며 장을 마감했으며, <strong>코스닥</strong>은 1188.47로 <strong>0.32% 하락</strong>했습니다.</li>
+                    
+                    <li>이날의 코스피 상승은 반도체와 자동차 주식의 강세에 힘입은 것으로, <strong>삼성전자</strong>는 <strong>1.72% 상승</strong>하며 <strong>59,000원</strong>에 거래되었습니다.</li>
+                    
+                    <li>반면, 코스닥은 IT 및 바이오 주식의 부진으로 <strong>상대적으로 약세</strong>를 보이며, 특히 <strong>셀트리온</strong>의 주가가 <strong>1.15% 하락</strong>했습니다.</li>
+                    
+                    <li>또한, <strong>국제 유가</strong>가 상승하며 <strong>원화 가치</strong>가 하락함에 따라 에너지 관련 주식이 상승세를 보였고, <strong>SK이노베이션</strong>은 <strong>2.56% 상승</strong>했습니다.</li>
+                    
+                    <li>오늘 밤 미국 시장에서는 <strong>S&P500</strong>이 6946.13으로 <strong>0.12% 상승</strong>한 바 있으며, <strong>다우존스</strong>는 49482.15로 <strong>0.15% 하락</strong>하며 <strong>기업 실적 발표</strong>에 대한 긴장감이 감돌고 있습니다.</li>
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
