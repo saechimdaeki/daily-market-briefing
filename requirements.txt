@@ -1,0 +1,6 @@
+yfinance
+jinja2
+requests
+openai
+pytz
+python-dotenv
