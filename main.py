@@ -30,28 +30,49 @@ edition_title = "Morning Briefing: 간밤의 미장 & 국장 프리뷰" if is_mo
 def bold_filter(text):
     return re.sub(r'\*+([^*]+)\*+', r'<strong>\1</strong>', text)
 
-def get_index(ticker):
+def get_index_data(ticker):
     try:
-        data = yf.Ticker(ticker).history(period="1d")
-        if not data.empty:
-            return round(data['Close'].iloc[-1], 2)
-        return "N/A"
+        data = yf.Ticker(ticker).history(period="5d")
+        if len(data) >= 2:
+            today_close = data['Close'].iloc[-1]
+            yesterday_close = data['Close'].iloc[-2]
+            diff = today_close - yesterday_close
+            pct_change = (diff / yesterday_close) * 100
+            
+            if diff > 0:
+                color, sign, trend = "#ef4444", "▲", "상승"
+            elif diff < 0:
+                color, sign, trend = "#3b82f6", "▼", "하락"
+            else:
+                color, sign, trend = "#6b7280", "-", "보합"
+                
+            return {
+                "price": f"{today_close:,.2f}",
+                "change": f"{sign} {abs(diff):.2f} ({pct_change:+.2f}%)",
+                "color": color,
+                "trend": trend
+            }
     except Exception:
-        return "Error"
+        pass
+    return {"price": "N/A", "change": "", "color": "#000", "trend": ""}
 
-kospi_current = get_index("^KS11")
-kosdaq_current = get_index("^KQ11")
-sp500_current = get_index("^GSPC")
-dow_current = get_index("^DJI")
+kospi = get_index_data("^KS11")
+kosdaq = get_index_data("^KQ11")
+sp500 = get_index_data("^GSPC")
+dow = get_index_data("^DJI")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 prompt_context = "간밤의 미국 시장 주요 이슈와 오늘 한국 시장 관전 포인트" if is_morning else "오늘 한국 시장 주요 이슈와 마감 상황, 그리고 오늘 밤 미국 시장 관전 포인트"
 
 text_prompt = f"""
-현재 지수 - 코스피: {kospi_current}, 코스닥: {kosdaq_current}, S&P500: {sp500_current}, 다우존스: {dow_current}
-이 지수와 최신 경제 뉴스, 기업 실적, 지정학적 리스크를 바탕으로 {prompt_context}를 상세히 분석해 줘.
-구체적인 수치, 등락률, 금액을 반드시 포함해서 3~5개의 핵심 포인트로 정리해 줘.
+현재 팩트 데이터 (절대 지어내지 말 것):
+- 코스피: {kospi['price']} ({kospi['change']} - {kospi['trend']})
+- 코스닥: {kosdaq['price']} ({kosdaq['change']} - {kosdaq['trend']})
+- S&P500: {sp500['price']} ({sp500['change']} - {sp500['trend']})
+- 다우존스: {dow['price']} ({dow['change']} - {dow['trend']})
+
+위 실제 데이터를 무조건 반영해서 {prompt_context}를 3~5개의 핵심 포인트로 상세히 분석해 줘.
 각 포인트는 글머리 기호 없이 한 줄씩 작성하고, 강조할 핵심 단어 양쪽에만 별표(**)를 붙여.
 """
 
@@ -70,12 +91,16 @@ headline_response = client.chat.completions.create(
 comic_headline = headline_response.choices[0].message.content.strip()
 
 image_prompt = f"""
-A highly detailed, premium 3D isometric illustration for a modern financial technology blog.
-Theme: {comic_headline}.
-Style: Clean minimalist white background, soft studio lighting, glossy and sleek finish.
-Elements: Neatly arranged, high-end 3D icons such as a glowing server, a rising green chart, a sleek rocket, and gold coins.
-Layout: Very spacious, modern, and uncluttered.
-Crucially: DO NOT write any text, words, or numbers. Purely visual 3D objects only.
+A fun, 4-panel comic strip in a hand-drawn webtoon style, summarizing the stock market theme: '{comic_headline}'.
+Style: Playful, chibi characters (adorable bulls and bears), soft pastel colors, bold outlines.
+Layout: A 2x2 square grid.
+Content:
+- Include expressive speech bubbles and thought clouds in each panel.
+- INSIDE the bubbles, use ONLY short, impactful English words, onomatopoeia, or icons to convey emotion and meaning.
+- Examples of allowed text: "WOW!", "OH NO!", "BOOM!", "CRASH!", "TO THE MOON!", "HODL!", "BUY!", "SELL?", "PROFIT!", "PANIC!".
+- Use icons like 📈, 📉, 💰, 🚀, 😭, 😍 alongside or instead of text.
+- DO NOT write full sentences or complex grammar. Keep it punchy and comic-like.
+- Ensure the text is drawn clearly within the bubbles as part of the artwork.
 """
 
 image_response = client.images.generate(
@@ -100,10 +125,10 @@ html_output = template.render(
     current_time=current_time_str,
     comic_headline=comic_headline,
     summary_items=summary_items,
-    kospi_price=f"{kospi_current:,}" if isinstance(kospi_current, (int, float)) else kospi_current,
-    kosdaq_price=f"{kosdaq_current:,}" if isinstance(kosdaq_current, (int, float)) else kosdaq_current,
-    sp500_price=f"{sp500_current:,}" if isinstance(sp500_current, (int, float)) else sp500_current,
-    dow_price=f"{dow_current:,}" if isinstance(dow_current, (int, float)) else dow_current
+    kospi=kospi,
+    kosdaq=kosdaq,
+    sp500=sp500,
+    dow=dow
 )
 
 with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
@@ -145,10 +170,10 @@ if TEAMS_WEBHOOK_URL:
                         {
                             "type": "FactSet",
                             "facts": [
-                                {"title": "KOSPI", "value": f"{kospi_current:,}" if isinstance(kospi_current, (int, float)) else kospi_current},
-                                {"title": "KOSDAQ", "value": f"{kosdaq_current:,}" if isinstance(kosdaq_current, (int, float)) else kosdaq_current},
-                                {"title": "S&P 500", "value": f"{sp500_current:,}" if isinstance(sp500_current, (int, float)) else sp500_current},
-                                {"title": "Dow Jones", "value": f"{dow_current:,}" if isinstance(dow_current, (int, float)) else dow_current}
+                                {"title": "KOSPI", "value": f"{kospi['price']} ({kospi['change']})"},
+                                {"title": "KOSDAQ", "value": f"{kosdaq['price']} ({kosdaq['change']})"},
+                                {"title": "S&P 500", "value": f"{sp500['price']} ({sp500['change']})"},
+                                {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"}
                             ]
                         },
                         {
@@ -161,7 +186,7 @@ if TEAMS_WEBHOOK_URL:
                     "actions": [
                         {
                             "type": "Action.OpenUrl",
-                            "title": "📊 웹페이지에서 보기",
+                            "title": "📊 프리미엄 웹페이지에서 보기",
                             "url": GITHUB_PAGES_URL
                         }
                     ]
