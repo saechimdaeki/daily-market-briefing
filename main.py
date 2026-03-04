@@ -60,7 +60,7 @@ kospi = get_index_data("^KS11")
 kosdaq = get_index_data("^KQ11")
 sp500 = get_index_data("^GSPC")
 dow = get_index_data("^DJI")
-nasdaq = get_index_data("^IXIC")
+nasdaq = get_index_data("^IXIC") # 나스닥 데이터 추가
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -93,10 +93,16 @@ headline_response = client.chat.completions.create(
 comic_headline = headline_response.choices[0].message.content.strip()
 
 image_prompt = f"""
-A high-quality, conceptual editorial illustration representing this specific stock market headline: '{comic_headline}'.
-Focus entirely on visually translating the mood (bullish, bearish, volatile, panic, or rally) and the core economic theme of the headline. 
-Use striking lighting, modern 3D or polished vector style, and clear financial symbolism (e.g., dynamic charts, bulls, bears, global maps, tech elements) that directly match the headline's sentiment. 
-DO NOT include any text, letters, or words in the image. Ensure the visual perfectly captures the current market narrative.
+A fun, 4-panel comic strip in a hand-drawn webtoon style, summarizing the stock market theme: '{comic_headline}'.
+Style: Playful, chibi characters (adorable bulls and bears), soft pastel colors, bold outlines.
+Layout: A 2x2 square grid.
+Content:
+- Include expressive speech bubbles and thought clouds in each panel.
+- INSIDE the bubbles, use ONLY short, impactful English words, onomatopoeia, or icons to convey emotion and meaning.
+- Examples of allowed text: "WOW!", "OH NO!", "BOOM!", "CRASH!", "TO THE MOON!", "HODL!", "BUY!", "SELL?", "PROFIT!", "PANIC!".
+- Use icons like 📈, 📉, 💰, 🚀, 😭, 😍 alongside or instead of text.
+- DO NOT write full sentences or complex grammar. Keep it punchy and comic-like.
+- Ensure the text is drawn clearly within the bubbles as part of the artwork.
 """
 
 image_response = client.images.generate(
@@ -125,7 +131,7 @@ html_output = template.render(
     kosdaq=kosdaq,
     sp500=sp500,
     dow=dow,
-    nasdaq=nasdaq # 나스닥 템플릿 전달
+    nasdaq=nasdaq # 템플릿에 나스닥 전달 추가
 )
 
 with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
@@ -171,7 +177,7 @@ if TEAMS_WEBHOOK_URL:
                                 {"title": "KOSDAQ", "value": f"{kosdaq['price']} ({kosdaq['change']})"},
                                 {"title": "S&P 500", "value": f"{sp500['price']} ({sp500['change']})"},
                                 {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"},
-                                {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"}
+                                {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"} # Teams 웹훅 나스닥 추가
                             ]
                         },
                         {
