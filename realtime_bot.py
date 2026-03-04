@@ -12,7 +12,7 @@ try:
 except ImportError:
     pass
 
-# 환경 변수 세팅 (GitHub Actions의 Secrets에서 주입받음)
+# 환경 변수 세팅
 OPENAI_API_KEY = os.environ.get("AI_API_KEY") 
 TEAMS_WEBHOOK_URL = os.environ.get("TEAMS_WEBHOOK_URL")
 
@@ -36,7 +36,7 @@ def get_finance_news_headlines():
             if title and title not in headlines:
                 headlines.append(title)
                 
-            if len(headlines) >= 15:
+            if len(headlines) >= 20: # 더 많은 뉴스를 확보
                 break
                 
         return headlines
@@ -45,28 +45,30 @@ def get_finance_news_headlines():
         return []
 
 def extract_tickers_from_news(headlines):
-    """뉴스 헤드라인에서 타겟 종목 추출"""
+    """뉴스 헤드라인에서 타겟 종목 추출 (정밀도 향상)"""
     if not headlines:
         return []
         
     prompt = f"""
-    다음 오늘 증시 관련 뉴스 헤드라인들을 바탕으로, 주가 변동이 클 것으로 예상되는 핵심 종목을 최대 3개만 추출해.
-    미국 주식은 티커(예: AAPL), 한국 주식은 종목코드 뒤에 .KS(코스피)나 .KQ(코스닥)를 붙여(예: 005930.KS).
+    다음 오늘 증시 관련 뉴스 헤드라인들을 바탕으로, 주가 변동이 클 것으로 예상되는 핵심 기업을 **최대 7개** 추출해.
+    
+    [매우 중요한 규칙]
+    1. '한화운용', 'KB자산운용' 같은 펀드/ETF 운용사 이름은 절대 추출하지 마. 실제 이슈가 있는 개별 상장 기업명(예: SK하이닉스, 테슬라 등)을 정확히 찾아내야 해.
+    2. 미국 주식은 티커(예: AAPL), 한국 주식은 종목코드 뒤에 .KS(코스피)나 .KQ(코스닥)를 정확히 매칭해(예: 000660.KS).
     
     뉴스: {headlines}
     
-    응답은 반드시 아래 JSON 배열 포맷만 출력 (마크다운 백틱 등 다른 말 절대 금지):
-    [{{"name": "종목명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄"}}]
+    응답은 반드시 아래 JSON 배열 포맷만 출력 (마크다운 백틱 금지):
+    [{{"name": "정확한 상장기업명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄 요약"}}]
     """
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini", 
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.2
+            temperature=0.1 # 정확도를 위해 온도 낮춤
         )
         res_text = response.choices[0].message.content.strip()
         
-        # JSON 포맷 마크다운 예외 처리
         if res_text.startswith("```json"): 
             res_text = res_text[7:-3]
         elif res_text.startswith("```"): 
@@ -80,7 +82,6 @@ def extract_tickers_from_news(headlines):
 def calculate_technical_indicators(ticker):
     """RSI, 볼린저 밴드, 일목균형표, 피보나치 등 종합 지표 계산"""
     try:
-        # 일목균형표(52일) 및 피보나치를 위해 6개월 데이터 확보
         df = yf.Ticker(ticker).history(period="6mo")
         if df.empty or len(df) < 52: 
             return None
@@ -110,7 +111,7 @@ def calculate_technical_indicators(ticker):
         low_26 = df['Low'].rolling(window=26).min()
         kijun_sen = (high_26 + low_26) / 2
         
-        # 4. 피보나치 되돌림 (최근 6개월 최고/최저 기준)
+        # 4. 피보나치 되돌림
         recent_high = df['High'].max()
         recent_low = df['Low'].min()
         diff = recent_high - recent_low
@@ -118,22 +119,18 @@ def calculate_technical_indicators(ticker):
         fib_500 = recent_high - diff * 0.500
         fib_618 = recent_high - diff * 0.618
         
-        # [핵심] 특이점(시그널) 감지 로직
         signals = []
         
-        # RSI 시그널
-        if current_rsi >= 70: signals.append("🔴 RSI 과매수 (70 이상)")
-        elif current_rsi <= 30: signals.append("🟢 RSI 과매도 (30 이하)")
+        if current_rsi >= 70: signals.append("🔴 RSI 과매수 (조정 주의)")
+        elif current_rsi <= 30: signals.append("🟢 RSI 과매도 (반등 기회)")
         
-        # 볼린저 밴드 시그널
-        if current_price >= bb_upper.iloc[-1]: signals.append("🔴 볼린저밴드 상단 돌파 (조정 주의)")
-        elif current_price <= bb_lower.iloc[-1]: signals.append("🟢 볼린저밴드 하단 이탈 (반등 기대)")
+        if current_price >= bb_upper.iloc[-1]: signals.append("🔴 볼린저밴드 상단 돌파 (차익 실현 고려)")
+        elif current_price <= bb_lower.iloc[-1]: signals.append("🟢 볼린저밴드 하단 이탈 (단기 지지선)")
         
-        # 일목균형표 기준선 교차 시그널
         if current_price > kijun_sen.iloc[-1] and df['Close'].iloc[-2] <= kijun_sen.iloc[-2]:
-            signals.append("🟢 일목균형표 기준선 상향 돌파 (강세 전환)")
+            signals.append("🟢 일목균형표 기준선 상향 돌파 (추세 강세)")
         elif current_price < kijun_sen.iloc[-1] and df['Close'].iloc[-2] >= kijun_sen.iloc[-2]:
-            signals.append("🔴 일목균형표 기준선 하향 이탈 (약세 전환)")
+            signals.append("🔴 일목균형표 기준선 하향 이탈 (추세 약세)")
             
         return {
             "price": current_price,
@@ -147,36 +144,35 @@ def calculate_technical_indicators(ticker):
             "signals": signals
         }
     except Exception as e:
-        print(f"지표 계산 실패: {e}")
+        print(f"[{ticker}] 지표 계산 실패: {e}")
         return None
 
 def generate_deep_analysis(name, reason, indicators):
-    """여러 기술적 지표를 종합한 AI 3줄 브리핑"""
+    """구조화된 3줄 요약 강제 적용"""
     prompt = f"""
-    월스트리트 수석 투자 분석가로서 '{name}' 종목에 대해 정확히 3줄로 요약해.
+    월스트리트 수석 투자 분석가로서 '{name}' 종목에 대해 분석해.
     
-    [현재 데이터 및 기술적 지표]
-    - 뉴스 이슈: {reason}
+    - 이슈: {reason}
     - 현재가: {indicators['price']:,.2f}
-    - 발생한 주요 시그널: {', '.join(indicators['signals'])}
-    - 보조지표: RSI({indicators['rsi']:.2f}), 볼린저 상단({indicators['bb_upper']:,.2f}), 볼린저 하단({indicators['bb_lower']:,.2f})
-    - 일목균형표 기준선: {indicators['kijun_sen']:,.2f}
-    - 피보나치 되돌림 주요 라인: 38.2%({indicators['fib_382']:,.2f}), 50%({indicators['fib_500']:,.2f}), 61.8%({indicators['fib_618']:,.2f})
+    - 시그널: {', '.join(indicators['signals']) if indicators['signals'] else '특이사항 없음'}
+    - RSI: {indicators['rsi']:.2f} / 볼린저 상단: {indicators['bb_upper']:,.0f} / 볼린저 하단: {indicators['bb_lower']:,.0f}
+    - 일목기준선: {indicators['kijun_sen']:,.0f} / 피보나치 50%: {indicators['fib_500']:,.0f}
 
-    [작성 규칙]
-    1줄: 뉴스 이슈에 따른 기본적 모멘텀 진단
-    2줄: 위 기술적 지표(시그널, 밴드, 되돌림 위치 등)들을 종합한 현재 주가 기술적 평가
-    3줄: 단기 대응 전략 (예: 50% 되돌림 지지 확인 후 분할매수, 밴드 상단이므로 차익실현 등)
+    [필수 작성 규칙]
+    하나의 단락으로 절대 뭉치지 마. 반드시 아래 형식대로 **3줄로 분리하고, 각 줄 앞에 '• ' 기호를 붙여서 작성**해.
+    • 1줄 (모멘텀): 이슈에 기반한 모멘텀 진단
+    • 2줄 (기술적 평가): 밴드, 지지선, RSI 등을 종합한 현재 주가 평가
+    • 3줄 (대응 전략): 단기 대응 가이드
     """
     try:
         res = client.chat.completions.create(
             model="gpt-4o-mini", 
             messages=[{"role": "user", "content": prompt}], 
-            temperature=0.5
+            temperature=0.3
         )
         return res.choices[0].message.content.strip()
     except Exception:
-        return "- 분석 불가"
+        return "• 분석을 불러오는 중 오류가 발생했습니다."
 
 def main():
     print("실시간 시장 감시 시작...")
@@ -186,8 +182,21 @@ def main():
         print("뉴스를 가져오지 못했습니다.")
         return
         
-    print(f"수집된 핵심 뉴스 {len(headlines)}건 분석 중...")
+    print("AI 타겟 종목 추출 중...")
     target_stocks = extract_tickers_from_news(headlines)
+    
+    # 여러 종목을 한 번에 모아서 보낼 리스트 준비
+    teams_body_elements = [
+        {
+            "type": "TextBlock",
+            "text": "⚡ 실시간 특징주 모니터링",
+            "weight": "Bolder",
+            "size": "Large",
+            "color": "Accent"
+        }
+    ]
+    
+    alert_triggered = False
     
     for stock in target_stocks:
         ticker = stock.get('ticker')
@@ -197,65 +206,74 @@ def main():
         indicators = calculate_technical_indicators(ticker)
         if indicators is None: 
             continue
-            
-        print(f"[{name}] 감지 - 현재가: {indicators['price']:,.0f}, RSI: {indicators['rsi']:.2f}")
         
-        # 지표들 중 하나라도 유의미한 시그널(signals)이 발생했을 때만 Teams 전송!
+        # 시그널이 발생한 종목만 필터링하여 카드에 추가
         if len(indicators['signals']) > 0:
-            print(f"🚨 [{name}] 강력한 기술적 시그널 발생! 심층 분석 시작...")
+            alert_triggered = True
+            print(f"🚨 [{name}] 강력한 기술적 시그널 발생! 리포트 작성 중...")
+            
             analysis = generate_deep_analysis(name, reason, indicators)
+            # 팀즈에서 줄바꿈이 정상 작동하도록 \n을 \n\n으로 교체
+            analysis_formatted = analysis.replace('\n', '\n\n')
             
-            # Teams 카드에 표시할 시그널 텍스트
-            signals_text = "\n".join([f"• {sig}" for sig in indicators['signals']])
+            signals_text = "\n\n".join([f"• {sig}" for sig in indicators['signals']])
             
-            payload = {
-                "type": "message",
-                "attachments": [
-                    {
-                        "contentType": "application/vnd.microsoft.card.adaptive",
-                        "content": {
-                            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                            "type": "AdaptiveCard",
-                            "version": "1.2",
-                            "body": [
-                                {
-                                    "type": "TextBlock",
-                                    "text": f"⚡ 실시간 시장 경고: {name} ({ticker})",
-                                    "weight": "Bolder",
-                                    "size": "Medium",
-                                    "color": "Attention"
-                                },
-                                {
-                                    "type": "FactSet",
-                                    "facts": [
-                                        {"title": "현재가", "value": f"₩ {indicators['price']:,.2f}"},
-                                        {"title": "이슈", "value": reason},
-                                        {"title": "기술적 신호", "value": signals_text},
-                                        {"title": "볼린저 밴드", "value": f"하단 {indicators['bb_lower']:,.0f} ~ 상단 {indicators['bb_upper']:,.0f}"},
-                                        {"title": "일목 기준선", "value": f"₩ {indicators['kijun_sen']:,.0f}"}
-                                    ]
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": analysis,
-                                    "wrap": True,
-                                    "separator": True
-                                }
-                            ]
-                        }
+            teams_body_elements.extend([
+                {
+                    "type": "TextBlock",
+                    "text": f"🎯 {name} ({ticker})",
+                    "weight": "Bolder",
+                    "size": "Medium",
+                    "spacing": "Medium",
+                    "color": "Good"
+                },
+                {
+                    "type": "FactSet",
+                    "facts": [
+                        {"title": "현재가", "value": f"₩ {indicators['price']:,.2f}"},
+                        {"title": "주요 이슈", "value": reason},
+                        {"title": "기술적 신호", "value": signals_text},
+                        {"title": "볼린저 밴드", "value": f"하단 {indicators['bb_lower']:,.0f} ~ 상단 {indicators['bb_upper']:,.0f}"},
+                        {"title": "RSI / 기준선", "value": f"{indicators['rsi']:.2f} / ₩ {indicators['kijun_sen']:,.0f}"}
+                    ]
+                },
+                {
+                    "type": "TextBlock",
+                    "text": analysis_formatted,
+                    "wrap": True,
+                    "spacing": "Small"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": " ", # 구분선 역할
+                    "wrap": True,
+                    "separator": True
+                }
+            ])
+
+    # 감지된 종목이 1개라도 있을 때만 묶어서 한 번에 전송
+    if alert_triggered and TEAMS_WEBHOOK_URL:
+        payload = {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": {
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                        "type": "AdaptiveCard",
+                        "version": "1.2",
+                        "body": teams_body_elements
                     }
-                ]
-            }
-            try:
-                if TEAMS_WEBHOOK_URL:
-                    requests.post(TEAMS_WEBHOOK_URL, json=payload)
-                    print(f"[{name}] Teams 실시간 알림 전송 완료!")
-                else:
-                    print("TEAMS_WEBHOOK_URL이 설정되지 않았습니다.")
-            except Exception as e:
-                print(f"알림 전송 실패: {e}")
-        else:
-            print(f"[{name}] 특이 시그널 없음. 알림 생략.")
+                }
+            ]
+        }
+        try:
+            requests.post(TEAMS_WEBHOOK_URL, json=payload)
+            print("Teams 통합 알림 전송 완료!")
+        except Exception as e:
+            print(f"알림 전송 실패: {e}")
+    else:
+        print("현재 강력한 시그널이 발생한 종목이 없습니다.")
 
 if __name__ == "__main__":
     main()

@@ -2,9 +2,7 @@ name: Realtime Trading Bot
 
 on:
   schedule:
-    # KST 기준 평일(월~금) 오전 8시에 동작 (UTC 기준 일~목 23시)
     - cron: '0 23 * * 0-4'
-    # KST 기준 평일(월~금) 오전 9시 ~ 오후 3시까지 1시간 간격 동작 (UTC 기준 월~금 0시~6시)
     - cron: '0 0-6 * * 1-5'
   workflow_dispatch: # Actions 탭에서 수동으로도 실행할 수 있도록 버튼 생성
 
@@ -22,14 +20,12 @@ jobs:
         python-version: '3.10'
 
     - name: 필수 패키지 설치
-      # requirements.txt에 빠진 패키지가 있을 수 있으므로 확실하게 직접 설치
       run: |
         python -m pip install --upgrade pip
         pip install requests yfinance pandas beautifulsoup4 openai python-dotenv
 
     - name: 실시간 감시 봇 실행
       env:
-        # Repository Secrets에 저장된 키를 불러와서 환경변수에 주입
         AI_API_KEY: ${{ secrets.AI_API_KEY }}
         TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
       run: python realtime_bot.py
