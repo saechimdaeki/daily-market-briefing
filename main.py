@@ -60,6 +60,7 @@ kospi = get_index_data("^KS11")
 kosdaq = get_index_data("^KQ11")
 sp500 = get_index_data("^GSPC")
 dow = get_index_data("^DJI")
+nasdaq = get_index_data("^IXIC")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -71,6 +72,7 @@ text_prompt = f"""
 - 코스닥: {kosdaq['price']} ({kosdaq['change']} - {kosdaq['trend']})
 - S&P500: {sp500['price']} ({sp500['change']} - {sp500['trend']})
 - 다우존스: {dow['price']} ({dow['change']} - {dow['trend']})
+- 나스닥: {nasdaq['price']} ({nasdaq['change']} - {nasdaq['trend']})
 
 위 실제 데이터를 무조건 반영해서 {prompt_context}를 3~5개의 핵심 포인트로 상세히 분석해 줘.
 각 포인트는 글머리 기호 없이 한 줄씩 작성하고, 강조할 핵심 단어 양쪽에만 별표(**)를 붙여.
@@ -91,16 +93,10 @@ headline_response = client.chat.completions.create(
 comic_headline = headline_response.choices[0].message.content.strip()
 
 image_prompt = f"""
-A fun, 4-panel comic strip in a hand-drawn webtoon style, summarizing the stock market theme: '{comic_headline}'.
-Style: Playful, chibi characters (adorable bulls and bears), soft pastel colors, bold outlines.
-Layout: A 2x2 square grid.
-Content:
-- Include expressive speech bubbles and thought clouds in each panel.
-- INSIDE the bubbles, use ONLY short, impactful English words, onomatopoeia, or icons to convey emotion and meaning.
-- Examples of allowed text: "WOW!", "OH NO!", "BOOM!", "CRASH!", "TO THE MOON!", "HODL!", "BUY!", "SELL?", "PROFIT!", "PANIC!".
-- Use icons like 📈, 📉, 💰, 🚀, 😭, 😍 alongside or instead of text.
-- DO NOT write full sentences or complex grammar. Keep it punchy and comic-like.
-- Ensure the text is drawn clearly within the bubbles as part of the artwork.
+A high-quality, conceptual editorial illustration representing this specific stock market headline: '{comic_headline}'.
+Focus entirely on visually translating the mood (bullish, bearish, volatile, panic, or rally) and the core economic theme of the headline. 
+Use striking lighting, modern 3D or polished vector style, and clear financial symbolism (e.g., dynamic charts, bulls, bears, global maps, tech elements) that directly match the headline's sentiment. 
+DO NOT include any text, letters, or words in the image. Ensure the visual perfectly captures the current market narrative.
 """
 
 image_response = client.images.generate(
@@ -128,7 +124,8 @@ html_output = template.render(
     kospi=kospi,
     kosdaq=kosdaq,
     sp500=sp500,
-    dow=dow
+    dow=dow,
+    nasdaq=nasdaq # 나스닥 템플릿 전달
 )
 
 with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
@@ -173,7 +170,8 @@ if TEAMS_WEBHOOK_URL:
                                 {"title": "KOSPI", "value": f"{kospi['price']} ({kospi['change']})"},
                                 {"title": "KOSDAQ", "value": f"{kosdaq['price']} ({kosdaq['change']})"},
                                 {"title": "S&P 500", "value": f"{sp500['price']} ({sp500['change']})"},
-                                {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"}
+                                {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"},
+                                {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"}
                             ]
                         },
                         {

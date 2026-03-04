@@ -11,12 +11,11 @@
         .container { max-width: 850px; padding-top: 3rem; padding-bottom: 3rem; }
         .header-title { font-weight: 800; font-size: 2.2rem; letter-spacing: -0.5px; color: #1f2937; }
         
-        .index-card { background: #ffffff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f3f4f6; }
+        .index-card { background: #ffffff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f3f4f6; height: 100%; }
         .index-title { font-size: 0.9rem; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .index-value { font-size: 1.6rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+        .index-value { font-size: 1.4rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
         .index-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; background-color: #f3f4f6; }
         
-        /* [핵심 수정] object-fit과 max-height를 없애서 1024x1024 원본 전체가 나오게 함 */
         .cover-img-container { background: #ffffff; border-radius: 24px; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 2rem; }
         .cover-img { width: 100%; height: auto; border-radius: 16px; display: block; }
         
@@ -38,33 +37,40 @@
             <p class="text-muted">마지막 업데이트: {{ current_time }}</p>
         </div>
         
-        <div class="row g-3 mb-5">
-            <div class="col-6 col-md-3">
+        <div class="row g-3 mb-5 row-cols-2 row-cols-md-5">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">KOSPI</div>
                     <div class="index-value">{{ kospi.price }}</div>
                     <div class="index-badge" style="color: {{ kospi.color }}; background-color: {{ kospi.color }}15;">{{ kospi.change }}</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">KOSDAQ</div>
                     <div class="index-value">{{ kosdaq.price }}</div>
                     <div class="index-badge" style="color: {{ kosdaq.color }}; background-color: {{ kosdaq.color }}15;">{{ kosdaq.change }}</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">S&P 500</div>
                     <div class="index-value">{{ sp500.price }}</div>
                     <div class="index-badge" style="color: {{ sp500.color }}; background-color: {{ sp500.color }}15;">{{ sp500.change }}</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">DOW JONES</div>
                     <div class="index-value">{{ dow.price }}</div>
                     <div class="index-badge" style="color: {{ dow.color }}; background-color: {{ dow.color }}15;">{{ dow.change }}</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="index-card">
+                    <div class="index-title">NASDAQ</div>
+                    <div class="index-value">{{ nasdaq.price }}</div>
+                    <div class="index-badge" style="color: {{ nasdaq.color }}; background-color: {{ nasdaq.color }}15;">{{ nasdaq.change }}</div>
                 </div>
             </div>
         </div>
