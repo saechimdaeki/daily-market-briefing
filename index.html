@@ -11,12 +11,11 @@
         .container { max-width: 850px; padding-top: 3rem; padding-bottom: 3rem; }
         .header-title { font-weight: 800; font-size: 2.2rem; letter-spacing: -0.5px; color: #1f2937; }
         
-        .index-card { background: #ffffff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f3f4f6; }
+        .index-card { background: #ffffff; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); border: 1px solid #f3f4f6; height: 100%; }
         .index-title { font-size: 0.9rem; font-weight: 600; color: #6b7280; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .index-value { font-size: 1.6rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
+        .index-value { font-size: 1.4rem; font-weight: 800; color: #111827; margin-bottom: 8px; }
         .index-badge { display: inline-block; padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; background-color: #f3f4f6; }
         
-        /* [핵심 수정] object-fit과 max-height를 없애서 1024x1024 원본 전체가 나오게 함 */
         .cover-img-container { background: #ffffff; border-radius: 24px; padding: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); margin-bottom: 2rem; }
         .cover-img { width: 100%; height: auto; border-radius: 16px; display: block; }
         
@@ -35,36 +34,43 @@
     <div class="container">
         <div class="text-center mb-5">
             <h1 class="header-title mb-2">Evening Briefing: 오늘 국장 마감 & 미장 프리뷰</h1>
-            <p class="text-muted">마지막 업데이트: 2026-03-04 17:09:21</p>
+            <p class="text-muted">마지막 업데이트: 2026-03-04 17:32:11</p>
         </div>
         
-        <div class="row g-3 mb-5">
-            <div class="col-6 col-md-3">
+        <div class="row g-3 mb-5 row-cols-2 row-cols-md-5">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">KOSPI</div>
                     <div class="index-value">5,093.54</div>
                     <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 698.37 (-12.06%)</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">KOSDAQ</div>
                     <div class="index-value">978.44</div>
                     <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 159.26 (-14.00%)</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">S&P 500</div>
                     <div class="index-value">6,816.63</div>
                     <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 64.99 (-0.94%)</div>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col">
                 <div class="index-card">
                     <div class="index-title">DOW JONES</div>
                     <div class="index-value">48,501.27</div>
                     <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 403.51 (-0.83%)</div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="index-card">
+                    <div class="index-title">NASDAQ</div>
+                    <div class="index-value">22,516.69</div>
+                    <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 232.17 (-1.02%)</div>
                 </div>
             </div>
         </div>
@@ -75,20 +81,20 @@
 
         <div class="summary-card">
             <div class="summary-header">
-                📰 하락세에 빠진 한국 시장
+                📰 한글 시장 전반 하락세
             </div>
             <div class="summary-body">
                 <ul class="summary-list">
                     
-                    <li>오늘 한국 시장은 <strong>코스피</strong>와 <strong>코스닥</strong> 모두 큰 폭의 하락세를 보이며 투자자들에게 압박감을 주었다.</li>
+                    <li>오늘 한국 시장은 <strong>전반적인 하락세</strong>를 보이며, 코스피가 5,093.54로 12.06% 하락했습니다.</li>
                     
-                    <li>코스피<strong>는 5,093.54로 마감하며 12.06% 하락하였고, </strong>코스닥**은 978.44로 14.00% 하락해 투자자 신뢰도가 크게 흔들렸다.</li>
+                    <li>코스닥도 <strong>상당한 하락</strong>을 기록하며 978.44로 마감, -14.00% 감소했습니다.</li>
                     
-                    <li>이러한 시장의 하락 원인은 <strong>글로벌 경제 불안정성</strong>과 <strong>금리 인상</strong> 우려가 주요한 요인으로 작용하고 있다.</li>
+                    <li>이러한 하락은 <strong>글로벌 경제 불확실성</strong>과 맞물려 투자자 심리를 위축시켰습니다.</li>
                     
-                    <li>특히, 지난해와 비교해 <strong>주요 기업의 실적 부진</strong>이 확인되면서 시장에 대한 부정적인 전망이 확산되고 있다.</li>
+                    <li>시장에서의 <strong>유동성 부족</strong>과 금리 인상 우려가 지속됨에 따라 추가적인 하락 압력이 예상됩니다.</li>
                     
-                    <li>오늘 밤 <strong>미국 시장</strong>에서는 <strong>제조업 지수</strong>와 <strong>소비자 신뢰지수</strong> 발표를 주목해야 하며, 이는 향후 경제 회복을 가늠하는 중요한 지표가 될 것으로 보인다.</li>
+                    <li>오늘 밤 미국 시장에서는 <strong>경제 지표 발표</strong>와 함께 기술주 중심으로의 변동성이 주목받을 가능성이 큽니다.</li>
                     
                 </ul>
             </div>
