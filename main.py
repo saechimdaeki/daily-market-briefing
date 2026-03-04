@@ -60,7 +60,8 @@ kospi = get_index_data("^KS11")
 kosdaq = get_index_data("^KQ11")
 sp500 = get_index_data("^GSPC")
 dow = get_index_data("^DJI")
-nasdaq = get_index_data("^IXIC") # 나스닥 데이터 추가
+nasdaq = get_index_data("^IXIC")
+ewy = get_index_data("EWY") # 🟢 추가: 야간 국장 대용 지표
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -73,6 +74,7 @@ text_prompt = f"""
 - S&P500: {sp500['price']} ({sp500['change']} - {sp500['trend']})
 - 다우존스: {dow['price']} ({dow['change']} - {dow['trend']})
 - 나스닥: {nasdaq['price']} ({nasdaq['change']} - {nasdaq['trend']})
+- 한국 야간지표(EWY): {ewy['price']} ({ewy['change']} - {ewy['trend']})
 
 위 실제 데이터를 무조건 반영해서 {prompt_context}를 3~5개의 핵심 포인트로 상세히 분석해 줘.
 각 포인트는 글머리 기호 없이 한 줄씩 작성하고, 강조할 핵심 단어 양쪽에만 별표(**)를 붙여.
@@ -131,7 +133,8 @@ html_output = template.render(
     kosdaq=kosdaq,
     sp500=sp500,
     dow=dow,
-    nasdaq=nasdaq # 템플릿에 나스닥 전달 추가
+    nasdaq=nasdaq,
+    ewy=ewy # 🟢 추가
 )
 
 with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
@@ -175,9 +178,10 @@ if TEAMS_WEBHOOK_URL:
                             "facts": [
                                 {"title": "KOSPI", "value": f"{kospi['price']} ({kospi['change']})"},
                                 {"title": "KOSDAQ", "value": f"{kosdaq['price']} ({kosdaq['change']})"},
+                                {"title": "EWY (한국ETF)", "value": f"{ewy['price']} ({ewy['change']})"}, # 🟢 추가
                                 {"title": "S&P 500", "value": f"{sp500['price']} ({sp500['change']})"},
                                 {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"},
-                                {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"} # Teams 웹훅 나스닥 추가
+                                {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"}
                             ]
                         },
                         {
