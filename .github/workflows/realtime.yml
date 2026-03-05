@@ -2,10 +2,12 @@ name: Realtime Trading Bot
 
 on:
   schedule:
-    - cron: '0 23 * * 0-4'
-    - cron: '0 0-6 * * 1-5'
+    # 한국 시간(KST) 평일 오전 8:00, 8:30 실행 (UTC 기준 일~목 23:00, 23:30)
+    - cron: '0,30 23 * * 0-4'
+    # 한국 시간(KST) 평일 오전 9:00 ~ 오후 3:30 사이 30분마다 실행 (UTC 기준 월~금 00:00 ~ 06:30)
+    - cron: '0,30 0-6 * * 1-5'
   workflow_dispatch: # Actions 탭에서 수동으로도 실행할 수 있도록 버튼 생성
-
+  
 jobs:
   monitor_stocks:
     runs-on: ubuntu-latest
