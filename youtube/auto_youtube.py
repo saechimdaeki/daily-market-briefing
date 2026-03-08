@@ -16,7 +16,7 @@ if not OPENAI_API_KEY:
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# [핵심] 리치 고슴도치 캐릭터 정의 (DALL-E 3 일관성 유지용)
+# 리치 고슴도치 캐릭터 정의
 RICH_HEDGEHOG = (
     "A cute 3D rendered hedgehog character with dark aviator sunglasses, "
     "a chunky gold dollar-sign pendant on a thick chain, and a small luxury gold watch on its wrist. "
@@ -24,7 +24,7 @@ RICH_HEDGEHOG = (
 )
 
 # ==========================================
-# 📊 2. 퀀트 데이터 수집 (2026-03-08 실시간)
+# 📊 2. 퀀트 데이터 수집
 # ==========================================
 def fetch_market_data():
     print(f"[1/6] {datetime.date.today()} 실시간 데이터를 수집 중...")
@@ -46,29 +46,43 @@ def fetch_market_data():
 # ==========================================
 def generate_assets(data):
     print("[2/6] '플렉스 고슴도치' 롱폼 시나리오 생성 중...")
+    
+    # [수정] JSON 구조를 훨씬 더 엄격하게 정의하여 에러 방지
     system_prompt = f"""
     당신은 주식 전문 AI 유튜버 '플렉스 고슴도치'입니다. 
     1. 반드시 첫 문장은 "플렉스 고슴도치가 알려줄게!"로 시작하세요.
     2. 김준성이라는 이름이나 CJ OliveNetworks 등 개인정보는 절대 언급하지 마세요.
     3. 2026년 실시간 데이터를 바탕으로 1500자 이상의 상세 분석 대본을 작성하세요.
-    4. 장면별 {RICH_HEDGEHOG} 이미지 프롬프트 10개를 작성하여 JSON으로 반환하세요.
-    5. 대본 말투는 자신감 넘치는 리치(Rich) 페르소나를 유지하세요.
+    4. 대본 말투는 자신감 넘치는 리치(Rich) 페르소나를 유지하세요.
+    
+    반드시 아래 JSON 형식을 엄격히 지켜 응답하세요:
+    {{
+      "script": "여기에 1500자 이상의 대본 작성",
+      "prompts": ["장면1 묘사", "장면2 묘사", "장면3 묘사", "장면4 묘사", "장면5 묘사", "장면6 묘사", "장면7 묘사", "장면8 묘사", "장면9 묘사", "장면10 묘사"]
+    }}
     """
-    res = client.chat.completions.create(
-        model="gpt-4o", messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": data}],
+    
+    response = client.chat.completions.create(
+        model="gpt-4o", 
+        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": data}],
         response_format={"type": "json_object"}
     )
-    res_data = json.loads(res.choices[0].message.content)
+    
+    res_data = json.loads(response.choices[0].message.content)
+    
+    # [수정] 방어적 키 확인 로직
+    script = res_data.get('script', "대본 생성 오류")
+    prompts = res_data.get('prompts', ["financial growth"] * 10)
     
     print("[3/6] OpenAI TTS(onyx) 음성 및 Whisper 정밀 분석 중...")
-    audio_res = client.audio.speech.create(model="tts-1", voice="onyx", input=res_data['script'])
+    audio_res = client.audio.speech.create(model="tts-1", voice="onyx", input=script)
     audio_res.stream_to_file("voice.mp3")
     
     with open("voice.mp3", "rb") as f:
         transcript = client.audio.transcriptions.create(
             file=f, model="whisper-1", response_format="verbose_json", timestamp_granularities=["segment"]
         )
-    return res_data['script'], res_data['prompts'], transcript.segments
+    return script, prompts, transcript.segments
 
 # ==========================================
 # 🎨 5. 상황별 이미지 생성 및 🎬 6. 최종 렌더링
@@ -77,24 +91,29 @@ def assemble_video(prompts, segments):
     print(f"[4/6] DALL-E 3 이미지 10장 생성 중...")
     img_paths = []
     for i, p in enumerate(prompts):
-        res = client.images.generate(model="dall-e-3", prompt=f"{RICH_HEDGEHOG} {p}", size="1024x1024")
-        path = f"scene_{i}.png"
-        with open(path, "wb") as f: f.write(requests.get(res.data[0].url).content)
-        img_paths.append(path)
+        try:
+            res = client.images.generate(model="dall-e-3", prompt=f"{RICH_HEDGEHOG} {p}", size="1024x1024")
+            path = f"scene_{i}.png"
+            with open(path, "wb") as f:
+                f.write(requests.get(res.data[0].url).content)
+            img_paths.append(path)
+            time.sleep(1) # API 부하 방지
+        except Exception as e:
+            print(f"이미지 생성 실패({i}): {e}")
+            # 실패 시 기본 이미지나 이전 이미지 재사용 로직 가능
 
     print("[5/6] 정밀 싱크 및 자막 최적화 조립 중...")
     audio = AudioFileClip("voice.mp3")
     total_dur = audio.duration
     
-    # 자막 생성 (seg.text, seg.start 등 객체 접근 방식 적용)
     subtitle_clips = []
     for seg in segments:
+        # [수정] seg.text (객체 접근) 방식 유지
         t_clip = TextClip(seg.text, fontsize=38, color='yellow', bg_color='rgba(0,0,0,0.6)',
                           font='NanumGothicBold', size=(1600, None), method='caption', align='center')
         t_clip = t_clip.set_start(seg.start).set_end(seg.end).set_position(('center', 780))
         subtitle_clips.append(t_clip)
 
-    # 이미지 배경 (10장 균등 배분 및 Ken Burns 효과)
     img_dur = total_dur / len(img_paths)
     bg_clips = []
     for i, p in enumerate(img_paths):
