@@ -2,13 +2,10 @@ name: Daily Market Briefing Automation
 
 on:
   schedule:
-    # 1. 아침 브리핑: KST 월~금 오전 07:55 (UTC 일~목 22:55)
-    - cron: '55 22 * * 0-4'
-    
-    # 2. 장 시작 후 브리핑: KST 월~금 오전 09:30 (UTC 월~금 00:30)
-    - cron: '30 00 * * 1-5'
+    # 1. 장 시작 후 브리핑: KST 월~금 오전 09:20 (UTC 월~금 00:20)
+    - cron: '20 00 * * 1-5'
 
-    # 3. 저녁 브리핑: KST 월~금 오후 16:00 (UTC 월~금 07:00) 수정 완료
+    # 2. 저녁 브리핑: KST 월~금 오후 16:00 (UTC 월~금 07:00) 수정 완료
     - cron: '00 07 * * 1-5'
     
   workflow_dispatch:
