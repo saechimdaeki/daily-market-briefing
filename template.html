@@ -9,45 +9,157 @@
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         :root {
             --page-max-width: min(96vw, 1280px);
-            --card-radius: 24px;
-            --card-shadow: 0 18px 38px -24px rgba(15, 23, 42, 0.35);
+            --card-radius: 28px;
+            --card-shadow: 0 28px 60px -34px rgba(15, 23, 42, 0.42);
+            --panel-border: 1px solid rgba(255, 255, 255, 0.55);
+            --text-soft: #64748b;
         }
         body {
             background:
-                radial-gradient(circle at top, rgba(191, 219, 254, 0.25), transparent 30%),
-                #f3f4f6;
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 26%),
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 24%),
+                linear-gradient(180deg, #eff6ff 0%, #eef2ff 35%, #f8fafc 100%);
             font-family: 'Pretendard', sans-serif;
             color: #111827;
+            min-height: 100vh;
         }
         .container {
             max-width: var(--page-max-width);
-            padding-top: 1.75rem;
+            padding-top: 1.25rem;
             padding-bottom: 2.5rem;
+        }
+        .hero-panel {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at top right, rgba(96, 165, 250, 0.35), transparent 28%),
+                linear-gradient(135deg, #0f172a 0%, #172554 48%, #1d4ed8 100%);
+            color: #ffffff;
+            border-radius: 36px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+        }
+        .hero-panel::after {
+            content: "";
+            position: absolute;
+            inset: auto -80px -80px auto;
+            width: 220px;
+            height: 220px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            filter: blur(2px);
+        }
+        .hero-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        .hero-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: stretch;
+            gap: 18px;
+        }
+        .hero-copy {
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        .hero-kicker {
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 0.96rem;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
         }
         .header-title {
             font-weight: 800;
-            font-size: clamp(2rem, 2.4vw, 2.9rem);
-            letter-spacing: -0.8px;
-            color: #1f2937;
+            font-size: clamp(2.05rem, 3.2vw, 3.25rem);
+            letter-spacing: -1.1px;
+            color: #ffffff;
+            margin-bottom: 10px;
         }
         .header-subtitle {
+            color: rgba(255, 255, 255, 0.74);
             font-size: 1rem;
             margin-bottom: 0;
         }
+        .hero-stamp {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 16px 18px;
+            min-width: 180px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
+            text-align: left;
+        }
+        .hero-stamp-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 6px;
+        }
+        .hero-stamp-value {
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(203, 213, 225, 0.85);
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
         
         .index-card {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 22px;
             padding: 22px 18px;
             text-align: center;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(226, 232, 240, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.65);
             height: 100%;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
         .index-title {
             font-size: 0.82rem;
             font-weight: 700;
-            color: #6b7280;
+            color: var(--text-soft);
             letter-spacing: 0.7px;
             margin-bottom: 10px;
         }
@@ -63,40 +175,149 @@
             border-radius: 999px;
             font-size: 0.86rem;
             font-weight: 700;
-            background-color: #f3f4f6;
+            background-color: rgba(241, 245, 249, 0.92);
             white-space: nowrap;
         }
-        
-        .cover-img-container {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 28px;
-            padding: 10px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 1.5rem;
+        .feature-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+            gap: 20px;
+            align-items: stretch;
         }
-        .cover-img {
-            width: 100%;
-            height: auto;
-            border-radius: 22px;
-            display: block;
-        }
-        
+        .cover-panel,
         .summary-card {
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 30px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            height: 100%;
+        }
+        .cover-panel {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        .cover-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 6px 6px 14px;
+        }
+        .panel-title {
+            font-size: 1.08rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+        }
+        .panel-kicker {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #2563eb;
+            margin-bottom: 4px;
+        }
+        .cover-note {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .cover-img-container {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: stretch;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.08), rgba(59, 130, 246, 0.08));
+            border-radius: 24px;
+            padding: 10px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
         }
-        .summary-header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-            color: #ffffff;
-            padding: 22px 28px;
-            font-size: clamp(1.15rem, 1.4vw, 1.45rem);
-            font-weight: 800;
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 18px;
+            display: block;
         }
-        .summary-body { padding: 30px 28px; }
+        .cover-overlay {
+            position: absolute;
+            left: 24px;
+            bottom: 22px;
+            right: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 14px;
+            pointer-events: none;
+        }
+        .cover-overlay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.72);
+            color: #ffffff;
+            font-size: 0.82rem;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+        .cover-overlay-headline {
+            max-width: 420px;
+            padding: 14px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.88);
+            color: #0f172a;
+            font-size: 0.95rem;
+            font-weight: 800;
+            line-height: 1.45;
+            box-shadow: 0 16px 34px -24px rgba(15, 23, 42, 0.5);
+        }
+        .summary-header {
+            padding: 24px 28px 18px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.82);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+        }
+        .summary-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: rgba(30, 64, 175, 0.08);
+            color: #1d4ed8;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .summary-title {
+            font-size: clamp(1.24rem, 1.8vw, 1.64rem);
+            font-weight: 800;
+            line-height: 1.35;
+            color: #0f172a;
+        }
+        .summary-body {
+            padding: 30px 28px;
+            display: flex;
+            align-items: flex-start;
+            flex: 1;
+        }
         
-        .summary-list { padding-left: 0; list-style: none; margin: 0; }
+        .summary-list {
+            padding-left: 0;
+            list-style: none;
+            margin: 0;
+            width: 100%;
+        }
         .summary-list li {
             position: relative;
             padding-left: 30px;
@@ -104,10 +325,29 @@
             font-size: clamp(1rem, 1.05vw, 1.12rem);
             line-height: 1.75;
             color: #374151;
+            text-align: left;
         }
         .summary-list li:last-child { margin-bottom: 0; }
-        .summary-list li::before { content: "🔥"; position: absolute; left: 0; top: 2px; font-size: 1.1rem; }
+        .summary-list li::before { content: "✦"; position: absolute; left: 0; top: 2px; font-size: 1rem; color: #2563eb; }
         strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
+
+        @media (max-width: 1199.98px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-layout {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .hero-stamp {
+                min-width: 0;
+                width: 100%;
+                max-width: 320px;
+            }
+            .cover-img {
+                height: auto;
+            }
+        }
 
         @media (max-width: 767.98px) {
             .container {
@@ -115,17 +355,37 @@
                 padding-top: 1rem;
                 padding-bottom: 1.5rem;
             }
-            .cover-img-container,
+            .market-grid {
+                gap: 10px;
+            }
+            .hero-panel,
+            .cover-panel,
             .summary-card {
-                border-radius: 22px;
+                border-radius: 24px;
             }
             .cover-img {
                 border-radius: 16px;
+            }
+            .cover-overlay {
+                position: static;
+                display: block;
+                padding: 14px 4px 2px;
+            }
+            .cover-overlay-badge {
+                margin-bottom: 10px;
+            }
+            .cover-overlay-headline {
+                max-width: none;
+                border-radius: 16px;
+                text-align: left;
             }
             .summary-header,
             .summary-body {
                 padding-left: 18px;
                 padding-right: 18px;
+            }
+            .hero-panel {
+                padding: 22px 18px;
             }
             .index-card {
                 padding: 16px 14px;
@@ -133,76 +393,98 @@
             .index-badge {
                 white-space: normal;
             }
+            .cover-panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .summary-body {
+                display: block;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="text-center mb-4">
-            <h1 class="header-title mb-2">{{ edition_title }}</h1>
-            <p class="text-muted header-subtitle">마지막 업데이트: {{ current_time }}</p>
-        </div>
+        <section class="hero-panel mb-4">
+            <div class="hero-meta">Daily Market Briefing</div>
+            <div class="hero-layout">
+                <div class="hero-copy">
+                    <div class="hero-kicker">Seoul and Wall Street pulse, reframed as a daily cover story</div>
+                    <h1 class="header-title">{{ edition_title }}</h1>
+                    <p class="header-subtitle">마지막 업데이트: {{ current_time }}</p>
+                </div>
+                <div class="hero-stamp">
+                    <div class="hero-stamp-label">Edition Focus</div>
+                    <div class="hero-stamp-value">{{ comic_headline }}</div>
+                </div>
+            </div>
+        </section>
         
-        <div class="row g-3 mb-4 row-cols-2 row-cols-md-3 row-cols-xl-6">
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">KOSPI</div>
-                    <div class="index-value">{{ kospi.price }}</div>
-                    <div class="index-badge" style="color: {{ kospi.color }}; background-color: {{ kospi.color }}15;">{{ kospi.change }}</div>
-                </div>
+        <div class="section-label">Market Dashboard</div>
+        <section class="market-grid">
+            <div class="index-card">
+                <div class="index-title">KOSPI</div>
+                <div class="index-value">{{ kospi.price }}</div>
+                <div class="index-badge" style="color: {{ kospi.color }}; background-color: {{ kospi.color }}15;">{{ kospi.change }}</div>
             </div>
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">KOSDAQ</div>
-                    <div class="index-value">{{ kosdaq.price }}</div>
-                    <div class="index-badge" style="color: {{ kosdaq.color }}; background-color: {{ kosdaq.color }}15;">{{ kosdaq.change }}</div>
-                </div>
+            <div class="index-card">
+                <div class="index-title">KOSDAQ</div>
+                <div class="index-value">{{ kosdaq.price }}</div>
+                <div class="index-badge" style="color: {{ kosdaq.color }}; background-color: {{ kosdaq.color }}15;">{{ kosdaq.change }}</div>
             </div>
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">EWY (한국ETF)</div>
-                    <div class="index-value">{{ ewy.price }}</div>
-                    <div class="index-badge" style="color: {{ ewy.color }}; background-color: {{ ewy.color }}15;">{{ ewy.change }}</div>
-                </div>
+            <div class="index-card">
+                <div class="index-title">EWY (한국ETF)</div>
+                <div class="index-value">{{ ewy.price }}</div>
+                <div class="index-badge" style="color: {{ ewy.color }}; background-color: {{ ewy.color }}15;">{{ ewy.change }}</div>
             </div>
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">S&P 500</div>
-                    <div class="index-value">{{ sp500.price }}</div>
-                    <div class="index-badge" style="color: {{ sp500.color }}; background-color: {{ sp500.color }}15;">{{ sp500.change }}</div>
-                </div>
+            <div class="index-card">
+                <div class="index-title">S&P 500</div>
+                <div class="index-value">{{ sp500.price }}</div>
+                <div class="index-badge" style="color: {{ sp500.color }}; background-color: {{ sp500.color }}15;">{{ sp500.change }}</div>
             </div>
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">DOW JONES</div>
-                    <div class="index-value">{{ dow.price }}</div>
-                    <div class="index-badge" style="color: {{ dow.color }}; background-color: {{ dow.color }}15;">{{ dow.change }}</div>
-                </div>
+            <div class="index-card">
+                <div class="index-title">DOW JONES</div>
+                <div class="index-value">{{ dow.price }}</div>
+                <div class="index-badge" style="color: {{ dow.color }}; background-color: {{ dow.color }}15;">{{ dow.change }}</div>
             </div>
-            <div class="col">
-                <div class="index-card">
-                    <div class="index-title">NASDAQ</div>
-                    <div class="index-value">{{ nasdaq.price }}</div>
-                    <div class="index-badge" style="color: {{ nasdaq.color }}; background-color: {{ nasdaq.color }}15;">{{ nasdaq.change }}</div>
-                </div>
+            <div class="index-card">
+                <div class="index-title">NASDAQ</div>
+                <div class="index-value">{{ nasdaq.price }}</div>
+                <div class="index-badge" style="color: {{ nasdaq.color }}; background-color: {{ nasdaq.color }}15;">{{ nasdaq.change }}</div>
             </div>
-        </div>
+        </section>
 
-        <div class="cover-img-container">
-            <img src="cover.png" class="cover-img" alt="Market Illustration">
-        </div>
+        <div class="feature-grid">
+            <section class="cover-panel">
+                <div class="cover-panel-header">
+                    <div>
+                        <div class="panel-kicker">Cover Story</div>
+                        <p class="panel-title">오늘의 시장 장면</p>
+                    </div>
+                    <div class="cover-note">AI Editorial Cover</div>
+                </div>
+                <div class="cover-img-container">
+                    <img src="cover.png" class="cover-img" alt="Market Illustration">
+                    <div class="cover-overlay">
+                        <div class="cover-overlay-badge">Market Signal</div>
+                        <div class="cover-overlay-headline">{{ comic_headline }}</div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="summary-card">
-            <div class="summary-header">
-                📰 {{ comic_headline }}
-            </div>
-            <div class="summary-body">
-                <ul class="summary-list">
-                    {% for item in summary_items %}
-                    <li>{{ item | bold | safe }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+            <section class="summary-card">
+                <div class="summary-header">
+                    <div class="summary-kicker">Topline Brief</div>
+                    <div class="summary-title">{{ comic_headline }}</div>
+                </div>
+                <div class="summary-body">
+                    <ul class="summary-list">
+                        {% for item in summary_items %}
+                        <li>{{ item | bold | safe }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
         </div>
     </div>
 </body>

@@ -83,6 +83,8 @@ def build_image_prompt(client, comic_headline, llm_summary_raw, market_snapshot,
 - 화면 안의 인물, 표정, 소품, 전광판, 차트 방향만 봐도 장세가 읽혀야 한다
 - 텍스트는 최소화하되 들어간다면 1~3단어 캡션만 허용
 - 은유는 허용하지만 실제 데이터와 직접 연결되어야 한다
+- 결과물은 시사만평처럼 날카롭되, 동시에 잡지 커버처럼 세련되고 아름다워야 한다
+- 색감, 조명, 구도, 레이어 깊이가 살아 있어야 하며 조잡하거나 낙서처럼 보여서는 안 된다
 
 아래 JSON만 출력해라. 백틱 금지.
 {{
@@ -109,9 +111,9 @@ def build_image_prompt(client, comic_headline, llm_summary_raw, market_snapshot,
         "primary_catalyst": "overnight macro shock and positioning battle",
         "catalyst_type": "macro",
         "must_show": ["US index board", "EWY monitor", "Korean trading desk"],
-        "visual_style": "sharp Korean editorial illustration, satirical finance magazine cover, dynamic camera angles, expressive human faces",
-        "color_palette": "electric red and blue market colors, emergency amber lights, ticker green accents, off-white paper background, bold black ink lines",
-        "mood_keywords": ["satirical", "chaotic", "urgent", "high-contrast"],
+        "visual_style": "polished Korean editorial illustration, premium finance magazine cover, cinematic composition, expressive human faces, layered lighting",
+        "color_palette": "electric red and cobalt blue market colors, emergency amber lights, refined ticker green accents, warm paper undertones, crisp black ink lines",
+        "mood_keywords": ["satirical", "cinematic", "urgent", "high-contrast"],
         "panels": [
             {
                 "focus": "overnight US market and EWY setting the tone",
@@ -192,11 +194,15 @@ Create a bold 4-panel editorial comic cover about the stock market headline: "{c
 - Tone: provocative, witty, sharp, meme-aware, financially literate, visually surprising
 - Make it feel like a Korean market satire cover, political cartoon, or financial magazine illustration
 - Prioritize irony, tension, positioning battle, fear vs greed, rotation, FOMO, panic, relief rallies
+- Visual quality must be beautiful, premium, and polished enough to feel like a cover illustration, not a rough storyboard
+- Use elegant color harmony, cinematic lighting, clean silhouette separation, rich textures, and balanced composition
+- Make the image stylish and eye-catching even before reading the details
 - If the market move is driven by a real public figure or policymaker, show a recognizable editorial caricature of that person prominently
 - If the market move is driven by tariffs, rates, AI, semiconductors, oil, regulation, elections, or war risk, make those catalysts visually explicit through props, setting, and headlines
 - Use human characters, officials, traders, anchors, analysts, or realistic symbolic objects only
 - Absolutely do not use bulls, bears, animals, mascots, plushies, chibi figures, or sticker-like characters
 - Avoid cute mascot energy, nursery pastel aesthetics, and repetitive faces
+- Avoid muddy colors, flat lighting, cluttered composition, sloppy anatomy, or amateur doodle quality
 - No copyrighted characters, no brand logos, no unreadable text walls
 - If text appears, keep it very short and integrated into the artwork, max 1-3 words per panel
 - Text should support the scene, but the image must still make sense without reading
