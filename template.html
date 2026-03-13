@@ -8,47 +8,53 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         :root {
-            --page-max-width: min(96vw, 1280px);
-            --card-radius: 28px;
-            --card-shadow: 0 28px 60px -34px rgba(15, 23, 42, 0.42);
-            --panel-border: 1px solid rgba(255, 255, 255, 0.55);
+            --page-max-width: min(96vw, 1320px);
+            --card-radius: 24px;
+            --card-shadow: 0 18px 40px -28px rgba(15, 23, 42, 0.18);
+            --panel-border: 1px solid rgba(226, 232, 240, 0.92);
             --text-soft: #64748b;
+            --title-color: #0f172a;
+            --surface: rgba(255, 255, 255, 0.94);
         }
         body {
             background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 26%),
-                radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 24%),
-                linear-gradient(180deg, #eff6ff 0%, #eef2ff 35%, #f8fafc 100%);
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 22%),
+                linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
             font-family: 'Pretendard', sans-serif;
             color: #111827;
             min-height: 100vh;
         }
         .container {
             max-width: var(--page-max-width);
-            padding-top: 1.25rem;
+            padding-top: 1rem;
             padding-bottom: 2.5rem;
         }
         .hero-panel {
             position: relative;
             overflow: hidden;
             background:
-                radial-gradient(circle at top right, rgba(96, 165, 250, 0.35), transparent 28%),
-                linear-gradient(135deg, #0f172a 0%, #172554 48%, #1d4ed8 100%);
-            color: #ffffff;
-            border-radius: 36px;
-            padding: 28px;
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
+            color: var(--title-color);
+            border-radius: 28px;
+            padding: 22px 24px;
             box-shadow: var(--card-shadow);
             border: var(--panel-border);
+        }
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1d4ed8 0%, #60a5fa 45%, #cbd5e1 100%);
         }
         .hero-panel::after {
             content: "";
             position: absolute;
-            inset: auto -80px -80px auto;
-            width: 220px;
-            height: 220px;
+            inset: auto -40px -56px auto;
+            width: 160px;
+            height: 160px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            filter: blur(2px);
+            background: rgba(59, 130, 246, 0.06);
         }
         .hero-meta {
             display: inline-flex;
@@ -56,42 +62,44 @@
             gap: 8px;
             padding: 7px 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(30, 41, 59, 0.06);
+            border: 1px solid rgba(148, 163, 184, 0.28);
             font-size: 0.8rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            color: #334155;
+            margin-bottom: 14px;
         }
         .hero-layout {
             display: flex;
             justify-content: space-between;
-            align-items: stretch;
+            align-items: flex-end;
             gap: 18px;
         }
         .hero-copy {
-            max-width: 760px;
+            max-width: 920px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
         }
         .hero-kicker {
-            color: rgba(255, 255, 255, 0.74);
-            font-size: 0.96rem;
+            color: #475569;
+            font-size: 0.94rem;
             letter-spacing: 0.04em;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .header-title {
             font-weight: 800;
-            font-size: clamp(2.05rem, 3.2vw, 3.25rem);
-            letter-spacing: -1.1px;
-            color: #ffffff;
+            font-size: clamp(1.9rem, 3vw, 3rem);
+            letter-spacing: -1.2px;
+            color: var(--title-color);
+            line-height: 1.08;
             margin-bottom: 10px;
         }
         .header-subtitle {
-            color: rgba(255, 255, 255, 0.74);
-            font-size: 1rem;
+            color: #64748b;
+            font-size: 0.95rem;
             margin-bottom: 0;
         }
         .hero-stamp {
@@ -99,26 +107,27 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 16px 18px;
-            min-width: 180px;
-            border-radius: 22px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(12px);
+            gap: 6px;
+            padding: 14px 16px;
+            min-width: 220px;
+            border-radius: 18px;
+            background: rgba(37, 99, 235, 0.05);
+            border: 1px solid rgba(96, 165, 250, 0.22);
             text-align: left;
         }
         .hero-stamp-label {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 6px;
+            color: #2563eb;
+            margin-bottom: 0;
         }
         .hero-stamp-value {
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             font-weight: 700;
-            line-height: 1.4;
+            line-height: 1.5;
+            color: #0f172a;
         }
         .section-label {
             display: inline-flex;
@@ -126,8 +135,8 @@
             gap: 8px;
             padding: 7px 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(203, 213, 225, 0.85);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(203, 213, 225, 0.92);
             color: #334155;
             font-size: 0.78rem;
             font-weight: 800;
@@ -143,14 +152,13 @@
         }
         
         .index-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 22px;
-            padding: 22px 18px;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 20px 18px;
             text-align: center;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.65);
+            border: var(--panel-border);
             height: 100%;
-            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -180,17 +188,16 @@
         }
         .feature-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
-            gap: 20px;
+            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+            gap: 18px;
             align-items: stretch;
         }
         .cover-panel,
         .summary-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 30px;
+            background: var(--surface);
+            border-radius: 24px;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
+            border: var(--panel-border);
             height: 100%;
         }
         .cover-panel {
@@ -201,12 +208,12 @@
         .cover-panel-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
-            padding: 6px 6px 14px;
+            padding: 2px 2px 14px;
         }
         .panel-title {
-            font-size: 1.08rem;
+            font-size: 1.02rem;
             font-weight: 800;
             color: #0f172a;
             margin: 0;
@@ -222,40 +229,33 @@
         .cover-note {
             padding: 8px 12px;
             border-radius: 999px;
-            background: rgba(37, 99, 235, 0.08);
-            color: #1d4ed8;
-            font-size: 0.82rem;
+            background: rgba(37, 99, 235, 0.06);
+            color: #2563eb;
+            font-size: 0.8rem;
             font-weight: 700;
             white-space: nowrap;
         }
         .cover-img-container {
-            position: relative;
             flex: 1;
-            display: flex;
-            align-items: stretch;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.08), rgba(59, 130, 246, 0.08));
-            border-radius: 24px;
-            padding: 10px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
+            display: block;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 8px;
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
         .cover-img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 18px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 14px;
             display: block;
         }
         .cover-overlay {
-            position: absolute;
-            left: 24px;
-            bottom: 22px;
-            right: 24px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             gap: 14px;
-            pointer-events: none;
+            margin-top: 12px;
         }
         .cover-overlay-badge {
             display: inline-flex;
@@ -263,27 +263,26 @@
             gap: 8px;
             padding: 9px 14px;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.72);
+            background: rgba(15, 23, 42, 0.92);
             color: #ffffff;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            backdrop-filter: blur(10px);
         }
         .cover-overlay-headline {
-            max-width: 420px;
-            padding: 14px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.88);
+            max-width: 380px;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
             color: #0f172a;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             line-height: 1.45;
-            box-shadow: 0 16px 34px -24px rgba(15, 23, 42, 0.5);
+            text-align: right;
         }
         .summary-header {
-            padding: 24px 28px 18px;
+            padding: 22px 24px 16px;
             border-bottom: 1px solid rgba(226, 232, 240, 0.82);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.65));
         }
         .summary-kicker {
             display: inline-flex;
@@ -300,13 +299,13 @@
             margin-bottom: 12px;
         }
         .summary-title {
-            font-size: clamp(1.24rem, 1.8vw, 1.64rem);
+            font-size: clamp(1.2rem, 1.7vw, 1.55rem);
             font-weight: 800;
             line-height: 1.35;
             color: #0f172a;
         }
         .summary-body {
-            padding: 30px 28px;
+            padding: 24px 24px 26px;
             display: flex;
             align-items: flex-start;
             flex: 1;
@@ -323,12 +322,12 @@
             padding-left: 30px;
             margin-bottom: 18px;
             font-size: clamp(1rem, 1.05vw, 1.12rem);
-            line-height: 1.75;
+            line-height: 1.85;
             color: #374151;
             text-align: left;
         }
         .summary-list li:last-child { margin-bottom: 0; }
-        .summary-list li::before { content: "✦"; position: absolute; left: 0; top: 2px; font-size: 1rem; color: #2563eb; }
+        .summary-list li::before { content: "•"; position: absolute; left: 0; top: 1px; font-size: 1.25rem; color: #2563eb; }
         strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
 
         @media (max-width: 1199.98px) {
@@ -337,15 +336,12 @@
             }
             .hero-layout {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             .hero-stamp {
                 min-width: 0;
                 width: 100%;
-                max-width: 320px;
-            }
-            .cover-img {
-                height: auto;
+                max-width: none;
             }
         }
 
@@ -361,22 +357,20 @@
             .hero-panel,
             .cover-panel,
             .summary-card {
-                border-radius: 24px;
+                border-radius: 20px;
             }
             .cover-img {
-                border-radius: 16px;
+                border-radius: 12px;
             }
             .cover-overlay {
-                position: static;
                 display: block;
-                padding: 14px 4px 2px;
+                margin-top: 12px;
             }
             .cover-overlay-badge {
                 margin-bottom: 10px;
             }
             .cover-overlay-headline {
                 max-width: none;
-                border-radius: 16px;
                 text-align: left;
             }
             .summary-header,
@@ -385,7 +379,7 @@
                 padding-right: 18px;
             }
             .hero-panel {
-                padding: 22px 18px;
+                padding: 18px;
             }
             .index-card {
                 padding: 16px 14px;
