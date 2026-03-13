@@ -8,47 +8,53 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         :root {
-            --page-max-width: min(96vw, 1280px);
-            --card-radius: 28px;
-            --card-shadow: 0 28px 60px -34px rgba(15, 23, 42, 0.42);
-            --panel-border: 1px solid rgba(255, 255, 255, 0.55);
+            --page-max-width: min(96vw, 1320px);
+            --card-radius: 24px;
+            --card-shadow: 0 18px 40px -28px rgba(15, 23, 42, 0.18);
+            --panel-border: 1px solid rgba(226, 232, 240, 0.92);
             --text-soft: #64748b;
+            --title-color: #0f172a;
+            --surface: rgba(255, 255, 255, 0.94);
         }
         body {
             background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 26%),
-                radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 24%),
-                linear-gradient(180deg, #eff6ff 0%, #eef2ff 35%, #f8fafc 100%);
+                radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 22%),
+                linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
             font-family: 'Pretendard', sans-serif;
             color: #111827;
             min-height: 100vh;
         }
         .container {
             max-width: var(--page-max-width);
-            padding-top: 1.25rem;
+            padding-top: 1rem;
             padding-bottom: 2.5rem;
         }
         .hero-panel {
             position: relative;
             overflow: hidden;
             background:
-                radial-gradient(circle at top right, rgba(96, 165, 250, 0.35), transparent 28%),
-                linear-gradient(135deg, #0f172a 0%, #172554 48%, #1d4ed8 100%);
-            color: #ffffff;
-            border-radius: 36px;
-            padding: 28px;
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
+            color: var(--title-color);
+            border-radius: 28px;
+            padding: 22px 24px;
             box-shadow: var(--card-shadow);
             border: var(--panel-border);
+        }
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1d4ed8 0%, #60a5fa 45%, #cbd5e1 100%);
         }
         .hero-panel::after {
             content: "";
             position: absolute;
-            inset: auto -80px -80px auto;
-            width: 220px;
-            height: 220px;
+            inset: auto -40px -56px auto;
+            width: 160px;
+            height: 160px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            filter: blur(2px);
+            background: rgba(59, 130, 246, 0.06);
         }
         .hero-meta {
             display: inline-flex;
@@ -56,42 +62,44 @@
             gap: 8px;
             padding: 7px 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(30, 41, 59, 0.06);
+            border: 1px solid rgba(148, 163, 184, 0.28);
             font-size: 0.8rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            color: #334155;
+            margin-bottom: 14px;
         }
         .hero-layout {
             display: flex;
             justify-content: space-between;
-            align-items: stretch;
+            align-items: flex-end;
             gap: 18px;
         }
         .hero-copy {
-            max-width: 760px;
+            max-width: 920px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
         }
         .hero-kicker {
-            color: rgba(255, 255, 255, 0.74);
-            font-size: 0.96rem;
+            color: #475569;
+            font-size: 0.94rem;
             letter-spacing: 0.04em;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .header-title {
             font-weight: 800;
-            font-size: clamp(2.05rem, 3.2vw, 3.25rem);
-            letter-spacing: -1.1px;
-            color: #ffffff;
+            font-size: clamp(1.9rem, 3vw, 3rem);
+            letter-spacing: -1.2px;
+            color: var(--title-color);
+            line-height: 1.08;
             margin-bottom: 10px;
         }
         .header-subtitle {
-            color: rgba(255, 255, 255, 0.74);
-            font-size: 1rem;
+            color: #64748b;
+            font-size: 0.95rem;
             margin-bottom: 0;
         }
         .hero-stamp {
@@ -99,26 +107,27 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 16px 18px;
-            min-width: 180px;
-            border-radius: 22px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(12px);
+            gap: 6px;
+            padding: 14px 16px;
+            min-width: 220px;
+            border-radius: 18px;
+            background: rgba(37, 99, 235, 0.05);
+            border: 1px solid rgba(96, 165, 250, 0.22);
             text-align: left;
         }
         .hero-stamp-label {
-            font-size: 0.78rem;
+            font-size: 0.74rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 6px;
+            color: #2563eb;
+            margin-bottom: 0;
         }
         .hero-stamp-value {
-            font-size: 1.05rem;
+            font-size: 0.98rem;
             font-weight: 700;
-            line-height: 1.4;
+            line-height: 1.5;
+            color: #0f172a;
         }
         .section-label {
             display: inline-flex;
@@ -126,8 +135,8 @@
             gap: 8px;
             padding: 7px 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.82);
-            border: 1px solid rgba(203, 213, 225, 0.85);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(203, 213, 225, 0.92);
             color: #334155;
             font-size: 0.78rem;
             font-weight: 800;
@@ -143,14 +152,13 @@
         }
         
         .index-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 22px;
-            padding: 22px 18px;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 20px 18px;
             text-align: center;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.65);
+            border: var(--panel-border);
             height: 100%;
-            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -180,17 +188,16 @@
         }
         .feature-grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
-            gap: 20px;
+            grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+            gap: 18px;
             align-items: stretch;
         }
         .cover-panel,
         .summary-card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 30px;
+            background: var(--surface);
+            border-radius: 24px;
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
+            border: var(--panel-border);
             height: 100%;
         }
         .cover-panel {
@@ -201,12 +208,12 @@
         .cover-panel-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
-            padding: 6px 6px 14px;
+            padding: 2px 2px 14px;
         }
         .panel-title {
-            font-size: 1.08rem;
+            font-size: 1.02rem;
             font-weight: 800;
             color: #0f172a;
             margin: 0;
@@ -222,40 +229,33 @@
         .cover-note {
             padding: 8px 12px;
             border-radius: 999px;
-            background: rgba(37, 99, 235, 0.08);
-            color: #1d4ed8;
-            font-size: 0.82rem;
+            background: rgba(37, 99, 235, 0.06);
+            color: #2563eb;
+            font-size: 0.8rem;
             font-weight: 700;
             white-space: nowrap;
         }
         .cover-img-container {
-            position: relative;
             flex: 1;
-            display: flex;
-            align-items: stretch;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.08), rgba(59, 130, 246, 0.08));
-            border-radius: 24px;
-            padding: 10px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
+            display: block;
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 8px;
+            border: 1px solid rgba(226, 232, 240, 0.9);
         }
         .cover-img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 18px;
+            height: auto;
+            object-fit: contain;
+            border-radius: 14px;
             display: block;
         }
         .cover-overlay {
-            position: absolute;
-            left: 24px;
-            bottom: 22px;
-            right: 24px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: center;
             gap: 14px;
-            pointer-events: none;
+            margin-top: 12px;
         }
         .cover-overlay-badge {
             display: inline-flex;
@@ -263,27 +263,26 @@
             gap: 8px;
             padding: 9px 14px;
             border-radius: 999px;
-            background: rgba(15, 23, 42, 0.72);
+            background: rgba(15, 23, 42, 0.92);
             color: #ffffff;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            backdrop-filter: blur(10px);
         }
         .cover-overlay-headline {
-            max-width: 420px;
-            padding: 14px 16px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.88);
+            max-width: 380px;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
             color: #0f172a;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             font-weight: 800;
             line-height: 1.45;
-            box-shadow: 0 16px 34px -24px rgba(15, 23, 42, 0.5);
+            text-align: right;
         }
         .summary-header {
-            padding: 24px 28px 18px;
+            padding: 22px 24px 16px;
             border-bottom: 1px solid rgba(226, 232, 240, 0.82);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.46));
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.65));
         }
         .summary-kicker {
             display: inline-flex;
@@ -300,13 +299,13 @@
             margin-bottom: 12px;
         }
         .summary-title {
-            font-size: clamp(1.24rem, 1.8vw, 1.64rem);
+            font-size: clamp(1.2rem, 1.7vw, 1.55rem);
             font-weight: 800;
             line-height: 1.35;
             color: #0f172a;
         }
         .summary-body {
-            padding: 30px 28px;
+            padding: 24px 24px 26px;
             display: flex;
             align-items: flex-start;
             flex: 1;
@@ -323,12 +322,12 @@
             padding-left: 30px;
             margin-bottom: 18px;
             font-size: clamp(1rem, 1.05vw, 1.12rem);
-            line-height: 1.75;
+            line-height: 1.85;
             color: #374151;
             text-align: left;
         }
         .summary-list li:last-child { margin-bottom: 0; }
-        .summary-list li::before { content: "✦"; position: absolute; left: 0; top: 2px; font-size: 1rem; color: #2563eb; }
+        .summary-list li::before { content: "•"; position: absolute; left: 0; top: 1px; font-size: 1.25rem; color: #2563eb; }
         strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
 
         @media (max-width: 1199.98px) {
@@ -337,15 +336,12 @@
             }
             .hero-layout {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             .hero-stamp {
                 min-width: 0;
                 width: 100%;
-                max-width: 320px;
-            }
-            .cover-img {
-                height: auto;
+                max-width: none;
             }
         }
 
@@ -361,22 +357,20 @@
             .hero-panel,
             .cover-panel,
             .summary-card {
-                border-radius: 24px;
+                border-radius: 20px;
             }
             .cover-img {
-                border-radius: 16px;
+                border-radius: 12px;
             }
             .cover-overlay {
-                position: static;
                 display: block;
-                padding: 14px 4px 2px;
+                margin-top: 12px;
             }
             .cover-overlay-badge {
                 margin-bottom: 10px;
             }
             .cover-overlay-headline {
                 max-width: none;
-                border-radius: 16px;
                 text-align: left;
             }
             .summary-header,
@@ -385,7 +379,7 @@
                 padding-right: 18px;
             }
             .hero-panel {
-                padding: 22px 18px;
+                padding: 18px;
             }
             .index-card {
                 padding: 16px 14px;
@@ -411,11 +405,11 @@
                 <div class="hero-copy">
                     <div class="hero-kicker">Seoul and Wall Street pulse, reframed as a daily cover story</div>
                     <h1 class="header-title">Morning Briefing: 간밤의 미장 & 국장 프리뷰</h1>
-                    <p class="header-subtitle">마지막 업데이트: 2026-03-13 10:47:13</p>
+                    <p class="header-subtitle">마지막 업데이트: 2026-03-13 11:02:57</p>
                 </div>
                 <div class="hero-stamp">
                     <div class="hero-stamp-label">Edition Focus</div>
-                    <div class="hero-stamp-value">하락세 속 코스닥의 반전</div>
+                    <div class="hero-stamp-value">하락 속 반등, 아이러니한 시장</div>
                 </div>
             </div>
         </section>
@@ -424,13 +418,13 @@
         <section class="market-grid">
             <div class="index-card">
                 <div class="index-title">KOSPI</div>
-                <div class="index-value">5,515.13</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 68.12 (-1.22%)</div>
+                <div class="index-value">5,520.43</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 62.82 (-1.13%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">KOSDAQ</div>
-                <div class="index-value">1,152.47</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 4.07 (+0.35%)</div>
+                <div class="index-value">1,155.80</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 7.40 (+0.64%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">EWY (한국ETF)</div>
@@ -467,7 +461,7 @@
                     <img src="cover.png" class="cover-img" alt="Market Illustration">
                     <div class="cover-overlay">
                         <div class="cover-overlay-badge">Market Signal</div>
-                        <div class="cover-overlay-headline">하락세 속 코스닥의 반전</div>
+                        <div class="cover-overlay-headline">하락 속 반등, 아이러니한 시장</div>
                     </div>
                 </div>
             </section>
@@ -475,20 +469,20 @@
             <section class="summary-card">
                 <div class="summary-header">
                     <div class="summary-kicker">Topline Brief</div>
-                    <div class="summary-title">하락세 속 코스닥의 반전</div>
+                    <div class="summary-title">하락 속 반등, 아이러니한 시장</div>
                 </div>
                 <div class="summary-body">
                     <ul class="summary-list">
                         
-                        <li>간밤 미국 시장은 전반적으로 하락세를 보였으며, <strong>S&P500</strong>이 ▼103.18(-1.52%) 하락하면서 약세를 나타냈습니다. <strong>다우존스</strong>와 <strong>나스닥</strong>도 각각 ▼739.42(-1.56%) 및 ▼404.15(-1.78%)로 큰 폭의 하락을 기록했습니다.</li>
+                        <li>간밤의 <strong>미국 시장</strong>은 모든 주요 지수에서 1% 이상의 하락세를 보였으며, <strong>S&P500은 6,672.62</strong>로 마감하면서 투자 심리에 부정적인 영향을 주었습니다.</li>
                         
-                        <li>한국 야간지표인 <strong>EWY</strong>도 ▼9.35(-7.04%) 하락하여, 미국 시장의 부정적인 영향을 여실히 반영하고 있음을 보여주고 있습니다.</li>
+                        <li>한국 야간지표(<strong>EWY</strong>)는 <strong>123.50</strong>으로, 약 <strong>7.04%</strong> 하락하여 외국인 투자자들의 매도 압력이 심화되고 있음을 나타내고 있습니다.</li>
                         
-                        <li>오늘 아침 <strong>코스피</strong>는 5,515.13으로 ▼68.12(-1.22%) 하락했으며, <strong>코스닥</strong>은 1,152.47로 ▲4.07(+0.35%) 소폭 상승했습니다. 이는 코스닥이 상대적으로 저가 매수세에 의해 지지받고 있음을 나타냅니다.</li>
+                        <li>오늘 아침 <strong>코스피</strong>는 <strong>5,520.43</strong>으로 <strong>62.82</strong> 포인트 하락하며 개장했으며, 이는 여전히 부정적인 투자 심리를 반영하고 있습니다.</li>
                         
-                        <li>미국 시장의 큰 하락과 코스피의 약세는 투자자들에게 <strong>신중한 접근</strong>이 필요하다는 신호를 보내고 있습니다. 반면, 코스닥의 상승은 기술주에 대한 <strong>긍정적인 전망</strong>이 여전히 존재함을 시사합니다.</li>
+                        <li>코스닥<strong>은 </strong>1,155.80<strong>으로 </strong>7.40<strong> 포인트 상승하여 반등을 시도하고 있지만, </strong>코스피**의 하락과는 대조적인 흐름을 보이고 있습니다.</li>
                         
-                        <li>따라서 오늘 시장은 전반적인 <strong>불확실성</strong> 속에서 업종별 차별화가 뚜렷할 것으로 보이며, 투자자들은 <strong>방어적 포지션</strong>을 유지하되 코스닥 내 강세 종목에 대한 스폿 투자 또한 고려해야 합니다.</li>
+                        <li>오늘 시장에서는 <strong>벤치마크 지수</strong>가 하락하는 가운데 <strong>코스닥</strong>의 강세가 어느 정도 지속될지를 주목할 필요가 있으며, <strong>안정적인 방어주</strong>와 <strong>가치주</strong>에 대한 투자 전략을 고려하는 것이 유효할 것입니다.</li>
                         
                     </ul>
                 </div>
