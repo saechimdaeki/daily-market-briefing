@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import requests
 from bs4 import BeautifulSoup
 import yfinance as yf
@@ -17,6 +18,127 @@ OPENAI_API_KEY = os.environ.get("AI_API_KEY")
 TEAMS_WEBHOOK_URL = os.environ.get("TEAMS_WEBHOOK_URL")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+
+def normalize_company_name(name):
+    if not name:
+        return ""
+    normalized = re.sub(r"\(주\)|주식회사|\s+", "", str(name))
+    return re.sub(r"[^0-9A-Za-z가-힣]", "", normalized).lower()
+
+def get_korean_stock_code(ticker):
+    match = re.fullmatch(r"(\d{6})\.(KS|KQ)", str(ticker or "").upper())
+    if not match:
+        return None
+    return match.group(1)
+
+def fetch_company_name_by_code(code):
+    url = f"https://finance.naver.com/item/main.naver?code={code}"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        response.encoding = 'euc-kr'
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        title_text = soup.title.text.strip() if soup.title and soup.title.text else ""
+        if title_text:
+            return title_text.split(":")[0].strip()
+
+        company_anchor = soup.select_one(".wrap_company h2 a")
+        if company_anchor:
+            return company_anchor.get_text(strip=True)
+    except Exception as e:
+        print(f"[{code}] 종목명 조회 실패: {e}")
+    return None
+
+def resolve_market_suffix(code):
+    for suffix in ("KS", "KQ"):
+        try:
+            df = yf.Ticker(f"{code}.{suffix}").history(period="1mo")
+            if not df.empty:
+                return suffix
+        except Exception:
+            continue
+    return None
+
+def search_korean_stock_by_name(name):
+    if not name:
+        return None
+
+    url = "https://finance.naver.com/search/searchList.naver"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    normalized_target = normalize_company_name(name)
+
+    try:
+        response = requests.get(url, params={"query": name}, headers=headers, timeout=10)
+        response.raise_for_status()
+        response.encoding = 'euc-kr'
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        candidates = []
+        for anchor in soup.select('a[href*="/item/main.naver?code="]'):
+            href = anchor.get("href", "")
+            match = re.search(r"code=(\d{6})", href)
+            candidate_name = anchor.get_text(strip=True)
+            if not match or not candidate_name:
+                continue
+            candidates.append({
+                "name": candidate_name,
+                "code": match.group(1),
+            })
+
+        if not candidates:
+            return None
+
+        exact_candidate = next(
+            (candidate for candidate in candidates if normalize_company_name(candidate["name"]) == normalized_target),
+            candidates[0],
+        )
+        suffix = resolve_market_suffix(exact_candidate["code"])
+        if not suffix:
+            return None
+
+        return {
+            "name": exact_candidate["name"],
+            "ticker": f'{exact_candidate["code"]}.{suffix}',
+        }
+    except Exception as e:
+        print(f"[{name}] 종목 검색 실패: {e}")
+        return None
+
+def validate_and_correct_stock(name, ticker):
+    code = get_korean_stock_code(ticker)
+    if not code:
+        return {"name": name, "ticker": ticker}
+
+    official_name = fetch_company_name_by_code(code)
+    if official_name and normalize_company_name(official_name) == normalize_company_name(name):
+        return {"name": official_name, "ticker": ticker}
+
+    corrected = search_korean_stock_by_name(name)
+    if corrected:
+        print(f"종목 보정: {name} {ticker} -> {corrected['name']} {corrected['ticker']}")
+        return corrected
+
+    if official_name:
+        print(f"종목 불일치 감지: 요청={name}({ticker}), 실제={official_name}. 보정 실패로 원본 유지")
+    return {"name": name, "ticker": ticker}
+
+def validate_target_stocks(target_stocks):
+    validated = []
+    seen = set()
+
+    for stock in target_stocks:
+        corrected = validate_and_correct_stock(stock.get("name"), stock.get("ticker"))
+        corrected["reason"] = stock.get("reason")
+
+        dedupe_key = (corrected.get("name"), corrected.get("ticker"))
+        if dedupe_key in seen:
+            continue
+        seen.add(dedupe_key)
+        validated.append(corrected)
+
+    return validated
 
 def get_finance_news_headlines():
     """네이버 금융 '주요 뉴스'를 크롤링하여 핵심 기사 추출"""
@@ -211,6 +333,7 @@ def main():
         
     print("AI 타겟 종목 추출 중...")
     target_stocks = extract_tickers_from_news(headlines)
+    target_stocks = validate_target_stocks(target_stocks)
     print(f"-> 추출된 1차 타겟 종목 수: {len(target_stocks)}개")
     
     # 여러 종목을 한 번에 모아서 보낼 리스트 준비
