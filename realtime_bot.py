@@ -19,6 +19,46 @@ TEAMS_WEBHOOK_URL = os.environ.get("TEAMS_WEBHOOK_URL")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
+
+def _strip_llm_json_fence(text):
+    t = (text or "").strip()
+    if t.startswith("```json"):
+        t = t[7:]
+    elif t.startswith("```"):
+        t = t[3:]
+    if t.endswith("```"):
+        t = t[:-3]
+    return t.strip()
+
+
+def _parse_model_json_loose(text):
+    """
+    모델 출력을 dict 또는 list로 파싱. json_object 모드가 실패하거나
+    레거시 배열만 온 경우 보조 처리.
+    """
+    raw = _strip_llm_json_fence(text)
+    try:
+        data = json.loads(raw)
+        return data
+    except json.JSONDecodeError:
+        pass
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start != -1 and end > start:
+        try:
+            return json.loads(raw[start : end + 1])
+        except json.JSONDecodeError:
+            pass
+    start = raw.find("[")
+    end = raw.rfind("]")
+    if start != -1 and end > start:
+        try:
+            return json.loads(raw[start : end + 1])
+        except json.JSONDecodeError:
+            pass
+    raise ValueError("모델 응답을 JSON으로 파싱할 수 없음")
+
+
 def normalize_company_name(name):
     if not name:
         return ""
@@ -256,23 +296,28 @@ def extract_tickers_from_news(headlines):
 
     뉴스: {headlines}
 
-    응답은 **반드시 아래 JSON 배열 포맷만** 출력 (마크다운 백틱 없이):
-    [{{"name": "정확한 상장기업명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄 요약"}}]
+    응답은 **유효한 JSON 객체 하나만** 출력한다 (마크다운·설명·백틱 금지).
+    reason 문자열 안에 큰따옴표(")를 넣지 말 것 (깨짐 방지).
+    형식:
+    {{"stocks": [{{"name": "정확한 상장기업명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄 요약"}}, ...]}}
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini", 
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.2 # 다양한 종목 탐색을 위해 온도 살짝 조정
+            temperature=0.2,
+            response_format={"type": "json_object"},
         )
-        res_text = response.choices[0].message.content.strip()
-        
-        if res_text.startswith("```json"): 
-            res_text = res_text[7:-3]
-        elif res_text.startswith("```"): 
-            res_text = res_text[3:-3]
-            
-        return json.loads(res_text.strip())
+        res_text = response.choices[0].message.content or ""
+        data = _parse_model_json_loose(res_text)
+        if isinstance(data, dict):
+            stocks = data.get("stocks")
+            if isinstance(stocks, list):
+                return [s for s in stocks if isinstance(s, dict)]
+        if isinstance(data, list):
+            return [s for s in data if isinstance(s, dict)]
+        print("AI 추출: stocks 배열 없음 → 빈 목록")
+        return []
     except Exception as e:
         print(f"AI 추출 실패: {e}")
         return []
@@ -309,22 +354,26 @@ def align_stocks_to_news_context(headlines, stocks):
 3) 한국: 반드시 ######.KS 또는 ######.KQ. 미국: 야후 표준 티커(예: BRK-B).
 4) **명백히 뉴스와 무관**하거나 종목 지정이 틀렸다고 확신하면 exclude: true. 애매하면 exclude: false로 두고 ticker는 유지해도 된다.
 
-출력: JSON 배열만 (코드펜스·설명 금지). 길이는 입력과 동일하고 index는 0부터 N-1까지 정확히 한 번씩.
-형식: [{{"index": 0, "exclude": false, "name": "...", "ticker": "...", "reason": "한 줄"}}]"""
+출력: 유효한 JSON 객체 하나만 (코드펜스·설명 금지). reason 안에 큰따옴표(") 금지.
+길이는 입력과 동일하고 index는 0부터 N-1까지 정확히 한 번씩.
+형식: {{"alignments": [{{"index": 0, "exclude": false, "name": "...", "ticker": "...", "reason": "한 줄"}}, ...]}}"""
 
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1,
+            response_format={"type": "json_object"},
         )
-        res_text = response.choices[0].message.content.strip()
-        if res_text.startswith("```json"):
-            res_text = res_text[7:-3]
-        elif res_text.startswith("```"):
-            res_text = res_text[3:-3]
-        parsed = json.loads(res_text.strip())
+        res_text = response.choices[0].message.content or ""
+        data = _parse_model_json_loose(res_text)
+        if isinstance(data, dict):
+            parsed = data.get("alignments")
+        elif isinstance(data, list):
+            parsed = data
+        else:
+            parsed = None
         if not isinstance(parsed, list):
-            print("AI 맥락 정렬: 응답이 배열이 아님 → 원본 유지")
+            print("AI 맥락 정렬: alignments 배열 없음 → 원본 유지")
             return stocks
 
         parsed_sorted = sorted(
