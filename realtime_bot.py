@@ -277,6 +277,87 @@ def extract_tickers_from_news(headlines):
         print(f"AI 추출 실패: {e}")
         return []
 
+
+def align_stocks_to_news_context(headlines, stocks):
+    """
+    1차 추출(name/ticker/reason)이 뉴스 맥락과 맞는지 LLM이 판단·교정.
+    (예: 금 시세 이슈인데 GOLD 법인 티커가 붙은 경우 → GLD 등으로 정정)
+    이후 단계에서 yfinance로 실존·거래 여부를 다시 검증한다.
+    """
+    if not stocks:
+        return []
+    try:
+        listing = json.dumps(
+            [
+                {"index": i, "name": s.get("name"), "ticker": s.get("ticker"), "reason": s.get("reason")}
+                for i, s in enumerate(stocks)
+            ],
+            ensure_ascii=False,
+        )
+        hl = json.dumps(headlines, ensure_ascii=False)
+        prompt = f"""너는 한국·미국 상장 증권과 뉴스 맥락을 연결하는 편집자다.
+
+[뉴스 헤드라인]
+{hl}
+
+[1차 추출 종목 — 각 reason은 해당 줄과 연결된 한 줄 요약]
+{listing}
+
+각 index에 대해 다음을 수행한다.
+1) 헤드라인·reason이 말하는 **주체**가 무엇인지 구분한다 (특정 상장사 vs 원자재·금값·유가·지수·환율 등 거시 이슈).
+2) 그 주체에 투자자가 실제로 매매하는 **상장 종목/ETF 등**의 이름·티커가 맞는지 판단한다. 티커가 단어와만 비슷해 **다른 법인·상품**에 붙은 경우, 야후 파이낸스에서 쓰는 **올바른 심볼**로 고친다.
+3) 한국: 반드시 ######.KS 또는 ######.KQ. 미국: 야후 표준 티커(예: BRK-B).
+4) **명백히 뉴스와 무관**하거나 종목 지정이 틀렸다고 확신하면 exclude: true. 애매하면 exclude: false로 두고 ticker는 유지해도 된다.
+
+출력: JSON 배열만 (코드펜스·설명 금지). 길이는 입력과 동일하고 index는 0부터 N-1까지 정확히 한 번씩.
+형식: [{{"index": 0, "exclude": false, "name": "...", "ticker": "...", "reason": "한 줄"}}]"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+        )
+        res_text = response.choices[0].message.content.strip()
+        if res_text.startswith("```json"):
+            res_text = res_text[7:-3]
+        elif res_text.startswith("```"):
+            res_text = res_text[3:-3]
+        parsed = json.loads(res_text.strip())
+        if not isinstance(parsed, list):
+            print("AI 맥락 정렬: 응답이 배열이 아님 → 원본 유지")
+            return stocks
+
+        parsed_sorted = sorted(
+            (x for x in parsed if isinstance(x, dict) and isinstance(x.get("index"), int)),
+            key=lambda x: x["index"],
+        )
+        if len(parsed_sorted) != len(stocks) or any(
+            parsed_sorted[i].get("index") != i for i in range(len(stocks))
+        ):
+            print("AI 맥락 정렬: index/개수 불일치 → 원본 유지")
+            return stocks
+
+        out = []
+        for i, item in enumerate(parsed_sorted):
+            if item.get("exclude"):
+                print(
+                    f"AI 맥락 정렬 제외: #{i} "
+                    f"{stocks[i].get('ticker')} {stocks[i].get('name')}"
+                )
+                continue
+            new_ticker = (item.get("ticker") or stocks[i].get("ticker") or "").strip()
+            new_name = (item.get("name") or stocks[i].get("name") or "").strip()
+            new_reason = (item.get("reason") or stocks[i].get("reason") or "").strip()
+            old_t = (stocks[i].get("ticker") or "").strip()
+            if new_ticker.upper() != old_t.upper():
+                print(f"AI 맥락 정렬 교정: #{i} {old_t} → {new_ticker} ({new_name})")
+            out.append({"name": new_name, "ticker": new_ticker, "reason": new_reason})
+        return out
+    except Exception as e:
+        print(f"AI 맥락 정렬 실패: {e} → 원본 유지")
+        return stocks
+
+
 def calculate_technical_indicators(ticker):
     """RSI, MACD, 볼린저 밴드, 일목균형표 종합 지표 계산 (조건 완화)"""
     try:
@@ -399,8 +480,10 @@ def main():
         
     print("AI 타겟 종목 추출 중...")
     target_stocks = extract_tickers_from_news(headlines)
+    print("AI 뉴스 맥락 정렬 중...")
+    target_stocks = align_stocks_to_news_context(headlines, target_stocks)
     target_stocks = validate_target_stocks(target_stocks)
-    print(f"-> 추출된 1차 타겟 종목 수: {len(target_stocks)}개")
+    print(f"-> 타겟 종목 수 (맥락 정렬·검증 후): {len(target_stocks)}개")
     
     # 여러 종목을 한 번에 모아서 보낼 리스트 준비
     teams_body_elements = [
