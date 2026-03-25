@@ -31,6 +31,47 @@ def get_korean_stock_code(ticker):
         return None
     return match.group(1)
 
+
+def is_korean_equity_ticker(ticker):
+    return get_korean_stock_code(ticker) is not None
+
+
+def normalize_us_ticker_for_yf(ticker):
+    """yfinance 호환: BRK.B → BRK-B 등"""
+    t = str(ticker or "").strip().upper()
+    return t.replace(".", "-")
+
+
+def resolve_us_listed_equity(name, ticker):
+    """
+    나스닥·NYSE 등 미국 상장 여부를 yfinance로 확인하고,
+    공식 표시명·정규 티커를 반환. 실패 시 None (할루시네이션 방지로 제외).
+    """
+    yf_symbol = normalize_us_ticker_for_yf(ticker)
+    if not yf_symbol or not re.match(r"^[A-Z0-9.\-]+$", yf_symbol):
+        return None
+    if re.fullmatch(r"[0-9]+", yf_symbol):
+        return None
+    try:
+        stock = yf.Ticker(yf_symbol)
+        hist = stock.history(period="1mo")
+        if hist.empty:
+            return None
+        info = getattr(stock, "info", None) or {}
+        long_name = (info.get("longName") or info.get("shortName") or "").strip()
+        display_name = long_name or (name or "").strip() or yf_symbol
+        canonical = (info.get("symbol") or yf_symbol).strip().upper()
+        return {"name": display_name, "ticker": canonical}
+    except Exception as e:
+        print(f"[{ticker}] 미국 종목 검증 실패: {e}")
+        return None
+
+
+def format_money(value, market):
+    if market == "US":
+        return f"$ {value:,.2f}"
+    return f"₩ {value:,.2f}"
+
 def fetch_company_name_by_code(code):
     url = f"https://finance.naver.com/item/main.naver?code={code}"
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -107,22 +148,37 @@ def search_korean_stock_by_name(name):
         return None
 
 def validate_and_correct_stock(name, ticker):
-    code = get_korean_stock_code(ticker)
-    if not code:
-        return {"name": name, "ticker": ticker}
+    ticker_raw = str(ticker or "").strip()
+    code = get_korean_stock_code(ticker_raw)
+    if code:
+        official_name = fetch_company_name_by_code(code)
+        if official_name and normalize_company_name(official_name) == normalize_company_name(name):
+            return {"name": official_name, "ticker": ticker_raw, "market": "KR"}
 
-    official_name = fetch_company_name_by_code(code)
-    if official_name and normalize_company_name(official_name) == normalize_company_name(name):
-        return {"name": official_name, "ticker": ticker}
+        corrected = search_korean_stock_by_name(name)
+        if corrected:
+            print(f"종목 보정: {name} {ticker_raw} -> {corrected['name']} {corrected['ticker']}")
+            corrected["market"] = "KR"
+            return corrected
 
-    corrected = search_korean_stock_by_name(name)
-    if corrected:
-        print(f"종목 보정: {name} {ticker} -> {corrected['name']} {corrected['ticker']}")
-        return corrected
+        if official_name:
+            print(f"종목 불일치 감지: 요청={name}({ticker_raw}), 실제={official_name}. 보정 실패로 원본 유지")
+        return {"name": name, "ticker": ticker_raw, "market": "KR"}
 
-    if official_name:
-        print(f"종목 불일치 감지: 요청={name}({ticker}), 실제={official_name}. 보정 실패로 원본 유지")
-    return {"name": name, "ticker": ticker}
+    if re.fullmatch(r"\d{6}", ticker_raw):
+        suffix = resolve_market_suffix(ticker_raw)
+        if suffix:
+            return validate_and_correct_stock(name, f"{ticker_raw}.{suffix}")
+        print(f"한국 6자리 코드 시장 확인 실패(제외): {ticker_raw}")
+        return None
+
+    resolved = resolve_us_listed_equity(name, ticker_raw)
+    if resolved:
+        resolved["market"] = "US"
+        return resolved
+
+    print(f"미국/기타 티커 검증 실패(제외): name={name!r} ticker={ticker_raw!r}")
+    return None
 
 def validate_target_stocks(target_stocks):
     validated = []
@@ -130,6 +186,8 @@ def validate_target_stocks(target_stocks):
 
     for stock in target_stocks:
         corrected = validate_and_correct_stock(stock.get("name"), stock.get("ticker"))
+        if not corrected:
+            continue
         corrected["reason"] = stock.get("reason")
 
         dedupe_key = (corrected.get("name"), corrected.get("ticker"))
@@ -158,7 +216,7 @@ def get_finance_news_headlines():
             if title and title not in headlines:
                 headlines.append(title)
                 
-            if len(headlines) >= 25: # 최대한 많은 뉴스를 확보 (풀 확장)
+            if len(headlines) >= 45:
                 break
                 
         return headlines
@@ -172,11 +230,11 @@ def extract_tickers_from_news(headlines):
         return []
         
     prompt = f"""
-    다음 오늘 증시 관련 뉴스 헤드라인들을 분석해서, 주가 변동이 예상되는 핵심 기업을 **최소 5개에서 최대 8개**까지 추출해.
-    특정 기업 하나만 추출하고 멈추면 안 됨. 반드시 다양한 기업을 찾아내야 함.
+    다음 오늘 증시 관련 뉴스 헤드라인들을 분석해서, 주가 변동이 예상되는 핵심 기업을 **최소 12개에서 최대 20개**까지 추출해.
+    특정 기업 하나만 추출하고 멈추면 안 됨. 한국·미국 등 **서로 다른 섹터·지역**을 골고루 포함해 다양하게 찾아야 함.
 
     [종목명-티커 매칭 규칙 (할루시네이션 방지)]
-    0. **추출 대상: 현재 코스피/코스닥/해외 거래소에 이미 상장되어 실거래되는 종목만**. 미상장·IPO 예정 기업은 절대 포함하지 말 것.
+    0. **추출 대상: 현재 코스피/코스닥/나스닥/NYSE 등에 이미 상장되어 실거래되는 종목만**. 미상장·IPO 예정 기업은 절대 포함하지 말 것.
     1. **뉴스에 나온 표현과 실제 상장 종목을 정확히 1:1로 매칭**해야 함. 비슷한 이름이라도 다른 종목이면 절대 혼동 금지.
     2. **한국 주식: 보통주 vs 우선주 구분 필수**
        - 삼성전자 = 005930.KS (보통주) | 삼성전자우 = 005935.KS (우선주). 뉴스에 "삼성전자"만 나오면 005930.KS만 사용. "우"가 없으면 우선주 티커(005935 등) 사용 금지.
@@ -192,8 +250,9 @@ def extract_tickers_from_news(headlines):
        - "IPO 예정", "상장 예정", "다음 주자", "공모 예정", "상장 준비", "코스닥/코스피 상장 예정" 등으로 **앞으로 상장할 회사**가 나오면 그 회사는 제외. 해당 뉴스에서 이미 상장된 다른 기업만 추출.
        - 예: "아이엠바이오로직스가 다음 주자로 기대" → 아이엠바이오로직스는 아직 비상장이므로 추출 금지. 티커를 붙이거나 다른 상장 종목 코드를 억지로 매칭하지 말 것.
     6. 펀드/운용사('한화운용', 'KB자산운용' 등)는 제외. 상장된 **개별 주식**만 추출.
-    7. 미국 주식은 티커만(예: AAPL), 한국 주식은 반드시 .KS(코스피) 또는 .KQ(코스닥) 접미사 사용(예: 005930.KS, 000660.KS).
-    8. 뉴스 본문에 티커가 잘못 표기되어 있어도(예: 삼전닉스에 005935 표기) 위 규칙을 우선 적용해 **올바른 티커로 보정**할 것.
+    7. **미국 주식**: 나스닥/NYSE 등 미국 본장 상장만. 티커는 **정확한 야후 파이낸스 심볼** 형태로만 (예: AAPL, MSFT, NVDA, GOOGL, AMZN, TSLA, META). OTC·핑크시트는 뉴스에 명시된 경우에만, 불확실하면 제외.
+    8. **한국 주식**: 반드시 6자리코드+.KS(코스피) 또는 .KQ(코스닥) (예: 005930.KS, 000660.KS).
+    9. 뉴스에 티커가 잘못 표기되어 있어도(예: 삼전닉스에 005935 표기) 위 규칙을 우선 적용해 **올바른 티커로 보정**할 것.
 
     뉴스: {headlines}
 
@@ -296,8 +355,13 @@ def calculate_technical_indicators(ticker):
         print(f"[{ticker}] 지표 계산 실패: {e}")
         return None
 
-def generate_deep_analysis(name, reason, indicators):
+def generate_deep_analysis(name, reason, indicators, market="KR"):
     """구조화된 3줄 요약 강제 적용"""
+    if market == "US":
+        currency_note = "모든 가격·밴드·기준선 수치는 미국 달러(USD) 기준이며, 본문에서 '원'·'₩' 표현을 쓰지 말고 달러($)로만 서술할 것."
+    else:
+        currency_note = "모든 가격·밴드·기준선 수치는 원화(KRW) 기준이며, 달러 표현을 쓰지 말 것."
+
     prompt = f"""
     월스트리트 수석 투자 분석가로서 '{name}' 종목에 대해 분석해.
     
@@ -306,6 +370,8 @@ def generate_deep_analysis(name, reason, indicators):
     - 시그널: {', '.join(indicators['signals']) if indicators['signals'] else '특이사항 없음'}
     - RSI: {indicators['rsi']:.2f} / 볼린저 상단: {indicators['bb_upper']:,.0f} / 볼린저 하단: {indicators['bb_lower']:,.0f}
     - 일목기준선: {indicators['kijun_sen']:,.0f} / 피보나치 50%: {indicators['fib_500']:,.0f}
+
+    [{currency_note}]
 
     [필수 작성 규칙]
     하나의 단락으로 절대 뭉치지 마. 반드시 아래 형식대로 **3줄로 분리하고, 각 줄 앞에 '• ' 기호를 붙여서 작성**해.
@@ -353,6 +419,7 @@ def main():
         ticker = stock.get('ticker')
         name = stock.get('name')
         reason = stock.get('reason')
+        market = stock.get('market') or ("KR" if is_korean_equity_ticker(ticker) else "US")
         
         indicators = calculate_technical_indicators(ticker)
         if indicators is None: 
@@ -363,10 +430,13 @@ def main():
             alert_triggered = True
             print(f"🚨 [{name}] 강력한 기술적 시그널 발생! 리포트 작성 중...")
             
-            analysis = generate_deep_analysis(name, reason, indicators)
+            analysis = generate_deep_analysis(name, reason, indicators, market=market)
             analysis_formatted = analysis.replace('\n', '\n\n')
             
             signals_text = "\n\n".join([f"• {sig}" for sig in indicators['signals']])
+            price_str = format_money(indicators['price'], market)
+            kijun_str = format_money(indicators['kijun_sen'], market)
+            bb_unit = "$" if market == "US" else "₩"
             
             teams_body_elements.extend([
                 {
@@ -380,11 +450,11 @@ def main():
                 {
                     "type": "FactSet",
                     "facts": [
-                        {"title": "현재가", "value": f"₩ {indicators['price']:,.2f}"},
+                        {"title": "현재가", "value": price_str},
                         {"title": "주요 이슈", "value": reason},
                         {"title": "기술적 신호", "value": signals_text},
-                        {"title": "볼린저 밴드", "value": f"하단 {indicators['bb_lower']:,.0f} ~ 상단 {indicators['bb_upper']:,.0f}"},
-                        {"title": "RSI / 기준선", "value": f"{indicators['rsi']:.2f} / ₩ {indicators['kijun_sen']:,.0f}"}
+                        {"title": "볼린저 밴드", "value": f"하단 {bb_unit} {indicators['bb_lower']:,.0f} ~ 상단 {bb_unit} {indicators['bb_upper']:,.0f}"},
+                        {"title": "RSI / 기준선", "value": f"{indicators['rsi']:.2f} / {kijun_str}"}
                     ]
                 },
                 {
