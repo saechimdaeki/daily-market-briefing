@@ -4,3 +4,5 @@ requests
 openai
 pytz
 python-dotenv
+pandas
+beautifulsoup4
