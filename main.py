@@ -7,6 +7,14 @@ import pytz
 from jinja2 import Environment, FileSystemLoader
 from openai import OpenAI
 import re
+from realtime_bot import (
+    align_stocks_to_news_context,
+    calculate_technical_indicators,
+    extract_tickers_from_news,
+    get_finance_news_headlines,
+    validate_target_stocks,
+)
+from theme_detector import detect_market_themes
 
 try:
     from dotenv import load_dotenv
@@ -46,6 +54,37 @@ def build_market_snapshot(kospi, kosdaq, sp500, dow, nasdaq, ewy):
         f"- NASDAQ: {nasdaq['price']} / {nasdaq['change']} / {nasdaq['trend']}",
         f"- EWY: {ewy['price']} / {ewy['change']} / {ewy['trend']}",
     ])
+
+
+def collect_theme_snapshot(client):
+    try:
+        headlines = get_finance_news_headlines()
+        if not headlines:
+            return {"themes": [], "market_regime_note": "오늘은 반복적으로 부각된 테마를 포착하지 못했습니다."}
+
+        stocks = extract_tickers_from_news(headlines)
+        stocks = align_stocks_to_news_context(headlines, stocks)
+        stocks = validate_target_stocks(stocks)
+
+        indicator_lookup = {}
+        for stock in stocks:
+            ticker = stock.get("ticker")
+            if not ticker:
+                continue
+            indicators = calculate_technical_indicators(ticker)
+            if indicators:
+                indicator_lookup[ticker] = indicators
+
+        return detect_market_themes(
+            headlines=headlines,
+            stocks=stocks,
+            indicator_lookup=indicator_lookup,
+            client=client,
+            max_themes=5,
+        )
+    except Exception as exc:
+        print(f"테마 스냅샷 생성 실패: {exc}")
+        return {"themes": [], "market_regime_note": "오늘은 반복적으로 부각된 테마를 포착하지 못했습니다."}
 
 def build_image_prompt(client, comic_headline, llm_summary_raw, market_snapshot, prompt_context):
     visual_brief_prompt = f"""
@@ -284,6 +323,8 @@ nasdaq = get_index_data("^IXIC")
 ewy = get_index_data("EWY")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+theme_result = collect_theme_snapshot(client)
+top_themes = theme_result.get("themes", [])
 
 prompt_context = "간밤의 미국 시장 주요 이슈와 오늘 아침 한국 시장의 개장 흐름 및 관전 포인트" if is_morning else "오늘 한국 시장 마감 상황 요약 및 오늘 밤 미국 시장 관전 포인트"
 
@@ -358,6 +399,8 @@ html_output = template.render(
     current_time=current_time_str,
     comic_headline=comic_headline,
     summary_items=summary_items,
+    themes=top_themes,
+    theme_note=theme_result.get("market_regime_note", ""),
     kospi=kospi,
     kosdaq=kosdaq,
     sp500=sp500,
@@ -412,6 +455,28 @@ if TEAMS_WEBHOOK_URL:
                                 {"title": "Dow Jones", "value": f"{dow['price']} ({dow['change']})"},
                                 {"title": "NASDAQ", "value": f"{nasdaq['price']} ({nasdaq['change']})"}
                             ]
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": "📡 오늘의 테마 랭킹",
+                            "weight": "Bolder",
+                            "size": "Medium",
+                            "separator": True,
+                            "isVisible": bool(top_themes),
+                        },
+                        {
+                            "type": "TextBlock",
+                            "text": (
+                                theme_result.get("market_regime_note", "") + "\n\n" + "\n".join(
+                                    [
+                                        f"• {theme['theme']} | 점수 {theme['score']} | {theme['stance']} | 대표 "
+                                        + ", ".join([leader['name'] for leader in theme['leaders'][:3]])
+                                        for theme in top_themes
+                                    ]
+                                )
+                            ).strip(),
+                            "wrap": True,
+                            "isVisible": bool(top_themes),
                         },
                         {
                             "type": "TextBlock",
