@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import yfinance as yf
 from openai import OpenAI
 import pandas as pd
-from theme_detector import detect_market_themes, format_theme_brief_lines
 
 try:
     from dotenv import load_dotenv
@@ -416,8 +415,6 @@ def calculate_technical_indicators(ticker):
             return None
             
         current_price = df['Close'].iloc[-1]
-        prev_close = df['Close'].iloc[-2]
-        pct_change = ((current_price - prev_close) / prev_close) * 100 if prev_close else 0.0
         
         # 1. RSI (14일)
         delta = df['Close'].diff()
@@ -477,7 +474,6 @@ def calculate_technical_indicators(ticker):
             
         return {
             "price": current_price,
-            "pct_change": pct_change,
             "rsi": current_rsi,
             "bb_upper": bb_upper.iloc[-1],
             "bb_lower": bb_lower.iloc[-1],
@@ -537,28 +533,6 @@ def main():
     target_stocks = align_stocks_to_news_context(headlines, target_stocks)
     target_stocks = validate_target_stocks(target_stocks)
     print(f"-> 타겟 종목 수 (맥락 정렬·검증 후): {len(target_stocks)}개")
-
-    indicator_lookup = {}
-    for stock in target_stocks:
-        ticker = stock.get("ticker")
-        if not ticker:
-            continue
-        indicators = calculate_technical_indicators(ticker)
-        if indicators is not None:
-            indicator_lookup[ticker] = indicators
-
-    theme_result = detect_market_themes(
-        headlines=headlines,
-        stocks=target_stocks,
-        indicator_lookup=indicator_lookup,
-        client=client,
-        max_themes=5,
-    )
-    top_themes = theme_result.get("themes", [])
-    if top_themes:
-        print("📡 오늘의 테마 랭킹")
-        for line in format_theme_brief_lines(top_themes):
-            print(f" - {line}")
     
     # 여러 종목을 한 번에 모아서 보낼 리스트 준비
     teams_body_elements = [
@@ -570,32 +544,6 @@ def main():
             "color": "Accent"
         }
     ]
-
-    if top_themes:
-        theme_lines = format_theme_brief_lines(top_themes)
-        teams_body_elements.extend(
-            [
-                {
-                    "type": "TextBlock",
-                    "text": "📡 오늘의 테마 랭킹",
-                    "weight": "Bolder",
-                    "size": "Medium",
-                    "spacing": "Medium",
-                },
-                {
-                    "type": "TextBlock",
-                    "text": theme_result.get("market_regime_note", "") + "\n\n" + "\n".join([f"• {line}" for line in theme_lines]),
-                    "wrap": True,
-                    "spacing": "Small",
-                },
-                {
-                    "type": "TextBlock",
-                    "text": " ",
-                    "wrap": True,
-                    "separator": True,
-                },
-            ]
-        )
     
     alert_triggered = False
     
@@ -605,7 +553,7 @@ def main():
         reason = stock.get('reason')
         market = stock.get('market') or ("KR" if is_korean_equity_ticker(ticker) else "US")
         
-        indicators = indicator_lookup.get(ticker)
+        indicators = calculate_technical_indicators(ticker)
         if indicators is None: 
             continue
         
