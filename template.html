@@ -192,6 +192,94 @@
             gap: 18px;
             align-items: stretch;
         }
+        .news-strip {
+            background: var(--surface);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+            padding: 18px;
+            margin-bottom: 1.5rem;
+        }
+        .news-strip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .news-strip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .news-item {
+            display: grid;
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.92);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.98));
+            padding: 12px;
+            min-height: 108px;
+        }
+        .news-thumb {
+            width: 84px;
+            height: 84px;
+            object-fit: cover;
+            border-radius: 14px;
+            background: #e2e8f0;
+        }
+        .news-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .news-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.76rem;
+            color: #64748b;
+        }
+        .news-scope {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        .news-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #0f172a;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-why,
+        .news-summary {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #334155;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-link {
+            margin-top: auto;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
         .cover-panel,
         .summary-card {
             background: var(--surface);
@@ -394,6 +482,15 @@
             .summary-body {
                 display: block;
             }
+            .news-item {
+                grid-template-columns: 68px minmax(0, 1fr);
+                gap: 10px;
+            }
+            .news-thumb {
+                width: 68px;
+                height: 68px;
+                border-radius: 12px;
+            }
         }
     </style>
 </head>
@@ -447,6 +544,49 @@
                 <div class="index-badge" style="color: {{ nasdaq.color }}; background-color: {{ nasdaq.color }}15;">{{ nasdaq.change }}</div>
             </div>
         </section>
+
+        {% if daily_news_items %}
+        <section class="news-strip">
+            <div class="news-strip-header">
+                <div>
+                    <div class="panel-kicker">Daily News</div>
+                    <p class="panel-title">오늘의 주요뉴스</p>
+                </div>
+                <div class="cover-note">LLM Curated</div>
+            </div>
+            <div class="news-strip-grid">
+                {% for article in daily_news_items %}
+                <article class="news-item">
+                    {% if article.image_url %}
+                    <img src="{{ article.image_url }}" alt="{{ article.title }}" class="news-thumb">
+                    {% else %}
+                    <div class="news-thumb"></div>
+                    {% endif %}
+                    <div class="news-body">
+                        <div class="news-meta">
+                            {% if article.impact_scope %}
+                            <span class="news-scope">{{ article.impact_scope }}</span>
+                            {% endif %}
+                            {% if article.publisher %}
+                            <span>{{ article.publisher }}</span>
+                            {% endif %}
+                            {% if article.published_at %}
+                            <span>{{ article.published_at }}</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="news-title">{{ article.title }}</a>
+                        {% if article.why_it_matters %}
+                        <div class="news-why">{{ article.why_it_matters }}</div>
+                        {% elif article.summary %}
+                        <div class="news-summary">{{ article.summary }}</div>
+                        {% endif %}
+                        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
 
         <div class="feature-grid">
             <section class="cover-panel">

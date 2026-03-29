@@ -7,6 +7,7 @@ import pytz
 from jinja2 import Environment, FileSystemLoader
 from openai import OpenAI
 import re
+from daily_news_digest import build_daily_news_digest, save_daily_news_digest
 
 try:
     from dotenv import load_dotenv
@@ -328,6 +329,13 @@ headline_response = client.chat.completions.create(
 comic_headline = headline_response.choices[0].message.content.strip()
 
 market_snapshot = build_market_snapshot(kospi, kosdaq, sp500, dow, nasdaq, ewy)
+news_digest = build_daily_news_digest(
+    client=client,
+    market_snapshot=market_snapshot,
+    is_morning=is_morning,
+    max_items=4,
+)
+daily_news_items = news_digest.get("items", [])
 image_prompt = build_image_prompt(
     client=client,
     comic_headline=comic_headline,
@@ -358,6 +366,7 @@ html_output = template.render(
     current_time=current_time_str,
     comic_headline=comic_headline,
     summary_items=summary_items,
+    daily_news_items=daily_news_items,
     kospi=kospi,
     kosdaq=kosdaq,
     sp500=sp500,
@@ -369,8 +378,41 @@ html_output = template.render(
 with open(os.path.join(OUTPUT_DIR, 'index.html'), 'w', encoding='utf-8') as f:
     f.write(html_output)
 
+save_daily_news_digest(OUTPUT_DIR, news_digest)
+
 if TEAMS_WEBHOOK_URL:
     teams_summary_text = re.sub(r'\*+', '', llm_summary_raw)
+    news_blocks = []
+    if daily_news_items:
+        news_blocks.append(
+            {
+                "type": "TextBlock",
+                "text": "📰 오늘의 주요뉴스",
+                "weight": "Bolder",
+                "size": "Medium",
+                "separator": True
+            }
+        )
+        for article in daily_news_items[:3]:
+            parts = [article.get("why_it_matters", ""), article.get("summary", "")]
+            news_text = "\n".join([part for part in parts if part])
+            news_blocks.extend(
+                [
+                    {
+                        "type": "TextBlock",
+                        "text": f"• {article.get('title', '')}",
+                        "weight": "Bolder",
+                        "wrap": True,
+                        "spacing": "Small"
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": news_text or article.get("description", ""),
+                        "wrap": True,
+                        "spacing": "None"
+                    }
+                ]
+            )
     
     teams_payload = {
         "type": "message",
@@ -418,9 +460,19 @@ if TEAMS_WEBHOOK_URL:
                             "text": teams_summary_text,
                             "wrap": True,
                             "separator": True
-                        }
+                        },
+                        *news_blocks
                     ],
                     "actions": [
+                        *[
+                            {
+                                "type": "Action.OpenUrl",
+                                "title": f"📰 {article.get('publisher') or '원문'} 보기",
+                                "url": article.get("url")
+                            }
+                            for article in daily_news_items[:3]
+                            if article.get("url")
+                        ],
                         {
                             "type": "Action.OpenUrl",
                             "title": "📊 프리미엄 웹페이지에서 보기",
