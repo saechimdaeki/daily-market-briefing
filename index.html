@@ -192,6 +192,94 @@
             gap: 18px;
             align-items: stretch;
         }
+        .news-strip {
+            background: var(--surface);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+            padding: 18px;
+            margin-bottom: 1.5rem;
+        }
+        .news-strip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .news-strip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .news-item {
+            display: grid;
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.92);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.98));
+            padding: 12px;
+            min-height: 108px;
+        }
+        .news-thumb {
+            width: 84px;
+            height: 84px;
+            object-fit: cover;
+            border-radius: 14px;
+            background: #e2e8f0;
+        }
+        .news-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .news-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.76rem;
+            color: #64748b;
+        }
+        .news-scope {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        .news-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #0f172a;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-why,
+        .news-summary {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #334155;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-link {
+            margin-top: auto;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
         .cover-panel,
         .summary-card {
             background: var(--surface);
@@ -394,6 +482,15 @@
             .summary-body {
                 display: block;
             }
+            .news-item {
+                grid-template-columns: 68px minmax(0, 1fr);
+                gap: 10px;
+            }
+            .news-thumb {
+                width: 68px;
+                height: 68px;
+                border-radius: 12px;
+            }
         }
     </style>
 </head>
@@ -404,12 +501,12 @@
             <div class="hero-layout">
                 <div class="hero-copy">
                     <div class="hero-kicker">Seoul and Wall Street pulse, reframed as a daily cover story</div>
-                    <h1 class="header-title">Evening Briefing: 오늘 국장 실시간 & 미장 프리뷰</h1>
-                    <p class="header-subtitle">마지막 업데이트: 2026-03-27 16:33:11</p>
+                    <h1 class="header-title">Morning Briefing: 간밤의 미장 & 국장 프리뷰</h1>
+                    <p class="header-subtitle">마지막 업데이트: 2026-03-30 08:42:23</p>
                 </div>
                 <div class="hero-stamp">
                     <div class="hero-stamp-label">Edition Focus</div>
-                    <div class="hero-stamp-value">하락과 상승의 혼전 양상</div>
+                    <div class="hero-stamp-value">하락의 여파, 반짝 상승의 아이러니</div>
                 </div>
             </div>
         </section>
@@ -419,34 +516,36 @@
             <div class="index-card">
                 <div class="index-title">KOSPI</div>
                 <div class="index-value">5,438.87</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 21.59 (-0.40%)</div>
+                <div class="index-badge" style="color: #6b7280; background-color: #6b728015;">- 0.00 (+0.00%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">KOSDAQ</div>
                 <div class="index-value">1,141.51</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 4.87 (+0.43%)</div>
+                <div class="index-badge" style="color: #6b7280; background-color: #6b728015;">- 0.00 (+0.00%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">EWY (한국ETF)</div>
-                <div class="index-value">119.99</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 7.75 (-6.07%)</div>
+                <div class="index-value">120.98</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 0.99 (+0.83%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">S&P 500</div>
-                <div class="index-value">6,477.16</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 114.74 (-1.74%)</div>
+                <div class="index-value">6,368.85</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 108.31 (-1.67%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">DOW JONES</div>
-                <div class="index-value">45,960.11</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 469.38 (-1.01%)</div>
+                <div class="index-value">45,166.64</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 793.47 (-1.73%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">NASDAQ</div>
-                <div class="index-value">21,408.08</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 521.74 (-2.38%)</div>
+                <div class="index-value">20,948.36</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 459.72 (-2.15%)</div>
             </div>
         </section>
+
+        
 
         <div class="feature-grid">
             <section class="cover-panel">
@@ -461,7 +560,7 @@
                     <img src="cover.png" class="cover-img" alt="Market Illustration">
                     <div class="cover-overlay">
                         <div class="cover-overlay-badge">Market Signal</div>
-                        <div class="cover-overlay-headline">하락과 상승의 혼전 양상</div>
+                        <div class="cover-overlay-headline">하락의 여파, 반짝 상승의 아이러니</div>
                     </div>
                 </div>
             </section>
@@ -469,20 +568,20 @@
             <section class="summary-card">
                 <div class="summary-header">
                     <div class="summary-kicker">Topline Brief</div>
-                    <div class="summary-title">하락과 상승의 혼전 양상</div>
+                    <div class="summary-title">하락의 여파, 반짝 상승의 아이러니</div>
                 </div>
                 <div class="summary-body">
                     <ul class="summary-list">
                         
-                        <li>오늘 한국 시장은 코스피가 <strong>하락</strong>세를 보이며 5,438.87로 마감했고, 코스닥은 <strong>소폭 상승</strong>하며 1,141.51의 지수를 기록했습니다.</li>
+                        <li>간밤 미장에서 S&P500과 나스닥이 각각 -1.67%와 -2.15% 하락하며 <strong>매도 압력</strong>이 강화되었고, 이로 인해 투자 심리가 위축되었다.</li>
                         
-                        <li>미국 시장의 S&P500과 다우존스, 나스닥 모두 <strong>하락</strong>세를 보였으며, 특히 나스닥은 2.38%의 큰 하락폭을 경험했습니다.</li>
+                        <li>한국 야간지표(EWY)가 상승세를 보여 0.83% 높아진 것은 <strong>긍정적 신호</strong>로 작용할 수 있으나, 여전히 미장 하락의 여파를 감안해야 한다.</li>
                         
-                        <li>한국 야간지표(EWY)는 119.99로 6.07% 하락하여, 미 장의 부정적인 흐름과 연결된 <strong>결과</strong>로 보입니다.</li>
+                        <li>현재 코스피 5,438.87과 코스닥 1,141.51은 전일 대비 <strong>급등락 없음</strong>을 나타내고 있어, 개장 후 관망세가 예상된다.</li>
                         
-                        <li>투자자들은 현재 한국 시장과 미국 시장의 <strong>온도 차이</strong>를 감안하여 더욱 신중한 접근이 필요하며, 코스닥의 <strong>상승</strong>을 활용해 분산 투자 전략을 고려할 수 있습니다.</li>
+                        <li>미국 시장의 하락과 한국 시장 지표 간의 <strong>온도 차</strong>로 인해, 오늘은 신중하게 대응하며 매수보다는 매도 포지션에 유의하는 것이 필요하다.</li>
                         
-                        <li>오늘 밤 미국 시장의 동향에 따라 한국 시장의 <strong>향후 방향성</strong>이 결정될 수 있으므로, 향후 발표될 경제 지표와 기업 실적을 주의 깊게 모니터링해야 합니다.</li>
+                        <li>특히, 미장의 영향이 미칠 가능성이 높으므로 <strong>방어주</strong> 중심의 전략을 고려해야 한다.</li>
                         
                     </ul>
                 </div>
