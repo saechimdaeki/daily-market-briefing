@@ -150,6 +150,7 @@
             gap: 12px;
             margin-bottom: 1.5rem;
         }
+        
         .index-card {
             background: var(--surface);
             border-radius: 20px;
@@ -190,6 +191,94 @@
             grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
             gap: 18px;
             align-items: stretch;
+        }
+        .news-strip {
+            background: var(--surface);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+            padding: 18px;
+            margin-bottom: 1.5rem;
+        }
+        .news-strip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .news-strip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .news-item {
+            display: grid;
+            grid-template-columns: 84px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            border-radius: 18px;
+            border: 1px solid rgba(226, 232, 240, 0.92);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.98));
+            padding: 12px;
+            min-height: 108px;
+        }
+        .news-thumb {
+            width: 84px;
+            height: 84px;
+            object-fit: cover;
+            border-radius: 14px;
+            background: #e2e8f0;
+        }
+        .news-body {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+        .news-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.76rem;
+            color: #64748b;
+        }
+        .news-scope {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        .news-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            line-height: 1.4;
+            color: #0f172a;
+            text-decoration: none;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-why,
+        .news-summary {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            color: #334155;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-link {
+            margin-top: auto;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
         }
         .cover-panel,
         .summary-card {
@@ -309,6 +398,7 @@
             align-items: flex-start;
             flex: 1;
         }
+        
         .summary-list {
             padding-left: 0;
             list-style: none;
@@ -392,6 +482,15 @@
             .summary-body {
                 display: block;
             }
+            .news-item {
+                grid-template-columns: 68px minmax(0, 1fr);
+                gap: 10px;
+            }
+            .news-thumb {
+                width: 68px;
+                height: 68px;
+                border-radius: 12px;
+            }
         }
     </style>
 </head>
@@ -402,12 +501,12 @@
             <div class="hero-layout">
                 <div class="hero-copy">
                     <div class="hero-kicker">Seoul and Wall Street pulse, reframed as a daily cover story</div>
-                    <h1 class="header-title">Evening Briefing: 오늘 국장 마감 & 미장 프리뷰</h1>
-                    <p class="header-subtitle">마지막 업데이트: 2026-02-26 14:15:21</p>
+                    <h1 class="header-title">Morning Briefing: 간밤의 미장 & 국장 프리뷰</h1>
+                    <p class="header-subtitle">마지막 업데이트: 2026-03-30 09:00:32</p>
                 </div>
                 <div class="hero-stamp">
                     <div class="hero-stamp-label">Edition Focus</div>
-                    <div class="hero-stamp-value">한국 시장, 상승세 확장</div>
+                    <div class="hero-stamp-value">미국 하락 속 한국은 오름세?</div>
                 </div>
             </div>
         </section>
@@ -416,25 +515,146 @@
         <section class="market-grid">
             <div class="index-card">
                 <div class="index-title">KOSPI</div>
-                <div class="index-value">6,222.04</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 138.18 (+2.27%)</div>
+                <div class="index-value">5,438.87</div>
+                <div class="index-badge" style="color: #6b7280; background-color: #6b728015;">- 0.00 (+0.00%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">KOSDAQ</div>
-                <div class="index-value">1,190.45</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 25.20 (+2.16%)</div>
+                <div class="index-value">1,141.51</div>
+                <div class="index-badge" style="color: #6b7280; background-color: #6b728015;">- 0.00 (+0.00%)</div>
+            </div>
+            <div class="index-card">
+                <div class="index-title">EWY (한국ETF)</div>
+                <div class="index-value">120.98</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 0.99 (+0.83%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">S&P 500</div>
-                <div class="index-value">6,946.13</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 56.06 (+0.81%)</div>
+                <div class="index-value">6,368.85</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 108.31 (-1.67%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">DOW JONES</div>
-                <div class="index-value">49,482.15</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 307.65 (+0.63%)</div>
+                <div class="index-value">45,166.64</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 793.47 (-1.73%)</div>
+            </div>
+            <div class="index-card">
+                <div class="index-title">NASDAQ</div>
+                <div class="index-value">20,948.36</div>
+                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 459.72 (-2.15%)</div>
             </div>
         </section>
+
+        
+        <section class="news-strip">
+            <div class="news-strip-header">
+                <div>
+                    <div class="panel-kicker">Daily News</div>
+                    <p class="panel-title">오늘의 주요뉴스</p>
+                </div>
+                <div class="cover-note">LLM Curated</div>
+            </div>
+            <div class="news-strip-grid">
+                
+                <article class="news-item">
+                    
+                    <img src="https://imgnews.pstatic.net/image/003/2026/03/30/NISI20260327_0021224897_web_20260327155323_20260330084714922.jpg?type=w800" alt="韓, 내달부터 세계국채지수 편입…증권가 &#34;최대 90조 유입 기대&#34;" class="news-thumb">
+                    
+                    <div class="news-body">
+                        <div class="news-meta">
+                            
+                            <span class="news-scope">Korea</span>
+                            
+                            
+                            <span>뉴시스</span>
+                            
+                            
+                            <span>2026-03-30 08:41:32</span>
+                            
+                        </div>
+                        <a href="https://n.news.naver.com/mnews/article/003/0013853226" target="_blank" rel="noopener noreferrer" class="news-title">韓, 내달부터 세계국채지수 편입…증권가 "최대 90조 유입 기대"</a>
+                        
+                        <div class="news-why">한국의 세계국채지수 편입이 외국인 자금 유입을 촉진할 것으로 예상된다.</div>
+                        
+                        <a href="https://n.news.naver.com/mnews/article/003/0013853226" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                    </div>
+                </article>
+                
+                <article class="news-item">
+                    
+                    <img src="https://imgnews.pstatic.net/image/009/2026/03/30/0005657859_001_20260330083909551.png?type=w800" alt="“인터넷 시대에 종이가 사라지던가요”…증권가, 터보퀀트 우려는 삼전 매수 기회 [오늘 나온 보고서]" class="news-thumb">
+                    
+                    <div class="news-body">
+                        <div class="news-meta">
+                            
+                            <span class="news-scope">Korea | Sector</span>
+                            
+                            
+                            <span>매일경제</span>
+                            
+                            
+                            <span>2026-03-30 08:39:09</span>
+                            
+                        </div>
+                        <a href="https://n.news.naver.com/mnews/article/009/0005657859" target="_blank" rel="noopener noreferrer" class="news-title">“인터넷 시대에 종이가 사라지던가요”…증권가, 터보퀀트 우려는 삼전 매수 기회 [오늘 나온 보고서]</a>
+                        
+                        <div class="news-why">삼성전자의 주가 급락이 매수 기회로 분석되고 있다.</div>
+                        
+                        <a href="https://n.news.naver.com/mnews/article/009/0005657859" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                    </div>
+                </article>
+                
+                <article class="news-item">
+                    
+                    <img src="https://imgnews.pstatic.net/image/366/2026/03/30/0001152561_001_20260330083909865.jpg?type=w800" alt="교보證 “삼성SDI, 저실적 예상에도 주가 흐름은 긍정적…목표가 58만원”" class="news-thumb">
+                    
+                    <div class="news-body">
+                        <div class="news-meta">
+                            
+                            <span class="news-scope">Korea | Sector</span>
+                            
+                            
+                            <span>조선비즈</span>
+                            
+                            
+                            <span>2026-03-30 08:37:09</span>
+                            
+                        </div>
+                        <a href="https://n.news.naver.com/mnews/article/366/0001152561" target="_blank" rel="noopener noreferrer" class="news-title">교보證 “삼성SDI, 저실적 예상에도 주가 흐름은 긍정적…목표가 58만원”</a>
+                        
+                        <div class="news-why">삼성SDI의 주가 흐름이 긍정적으로 평가되고 있다.</div>
+                        
+                        <a href="https://n.news.naver.com/mnews/article/366/0001152561" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                    </div>
+                </article>
+                
+                <article class="news-item">
+                    
+                    <img src="https://imgnews.pstatic.net/image/277/2026/03/30/0005741740_001_20260330083217960.jpg?type=w800" alt="[굿모닝 증시]&#34;경기 침체인가 아닌가&#34;…변동성 장세 속 주요 변수는" class="news-thumb">
+                    
+                    <div class="news-body">
+                        <div class="news-meta">
+                            
+                            <span class="news-scope">Macro | US | Korea</span>
+                            
+                            
+                            <span>아시아경제</span>
+                            
+                            
+                            <span>2026-03-30 08:31:11</span>
+                            
+                        </div>
+                        <a href="https://n.news.naver.com/mnews/article/277/0005741740" target="_blank" rel="noopener noreferrer" class="news-title">[굿모닝 증시]"경기 침체인가 아닌가"…변동성 장세 속 주요 변수는</a>
+                        
+                        <div class="news-why">미국 경제지표와 국제 정세가 국내 증시에 영향을 미칠 것으로 보인다.</div>
+                        
+                        <a href="https://n.news.naver.com/mnews/article/277/0005741740" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                    </div>
+                </article>
+                
+            </div>
+        </section>
+        
 
         <div class="feature-grid">
             <section class="cover-panel">
@@ -449,7 +669,7 @@
                     <img src="cover.png" class="cover-img" alt="Market Illustration">
                     <div class="cover-overlay">
                         <div class="cover-overlay-badge">Market Signal</div>
-                        <div class="cover-overlay-headline">한국 시장, 상승세 확장</div>
+                        <div class="cover-overlay-headline">미국 하락 속 한국은 오름세?</div>
                     </div>
                 </div>
             </section>
@@ -457,20 +677,20 @@
             <section class="summary-card">
                 <div class="summary-header">
                     <div class="summary-kicker">Topline Brief</div>
-                    <div class="summary-title">한국 시장, 상승세 확장</div>
+                    <div class="summary-title">미국 하락 속 한국은 오름세?</div>
                 </div>
                 <div class="summary-body">
                     <ul class="summary-list">
                         
-                        <li>오늘 한국 시장은 <strong>코스피</strong>와 <strong>코스닥</strong> 모두 상승세를 보이며 마감하였다.</li>
+                        <li>간밤 미국 시장에서 S&P500은 <strong>하락</strong>폭이 커 1.67% 감소하며 6,368.85로 마감했으며, 이는 전반적인 투자 심리가 부정적임을 보여줍니다.</li>
                         
-                        <li>코스피는 <strong>6,222.04</strong>로 <strong>138.18</strong> 포인트 상승하였고, 투자 심리가 개선된 것이 주요 원인으로 작용하였다.</li>
+                        <li>특히, 다우존스와 나스닥이 각각 1.73%와 2.15% 하락하였고, 이는 기술주와 대형주에 대한 <strong>불안감</strong>을 전달합니다.</li>
                         
-                        <li>코스닥도 <strong>1,190.45</strong>로 <strong>25.20</strong> 포인트 상승하며 전반적인 시장 회복을 나타냈고, 주식 매수세가 강하게 유입되었다.</li>
+                        <li>반면 한국 야간지표(EWY)는 120.98로 <strong>상승</strong>하며, 0.83% 증가했습니다. 이는 미국 시장의 하락에도 불구하고 한국 시장에 대한 <strong>긍정적 기대감</strong>이 여전히 존재함을 나타냅니다.</li>
                         
-                        <li>오늘 한국 시장에서는 특히 <strong>IT</strong>와 <strong>헬스케어</strong> 섹터의 강세가 두드러졌으며, 외국인 투자자들의 매수세가 증가한 점이 긍정적인 신호로 작용하였다.</li>
+                        <li>현재 코스피는 5,438.87, 코스닥은 1,141.51로, 각각 <strong>변동이 없는</strong> 모습입니다. 이는 시장이 미국의 부정적인 흐름에 <strong>경계</strong>하고 있으며, 투자자들이 매수에 신중을 기하고 있다는 점을 의미합니다.</li>
                         
-                        <li>오늘 밤 미국 시장에서는 <strong>S&P500</strong>과 <strong>다우존스</strong>의 상승세가 이어질지에 대한 관심이 집중되며, 특히 <strong>경제 지표 발표</strong>에 주목해야 할 시점이다.</li>
+                        <li>투자자들은 오늘 시장에서의 <strong>포지션</strong>에 대해 보수적인 접근을 택하고, 매수보다는 안정성에 집중하는 것이 바람직해 보이며, 특히 현금 비중을 늘려 잠재적인 기회를 노리는 전략이 필요합니다.</li>
                         
                     </ul>
                 </div>

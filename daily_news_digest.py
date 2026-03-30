@@ -2,13 +2,14 @@ import json
 import os
 import re
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import pytz
 import requests
 from bs4 import BeautifulSoup
 
 
+NAVER_FINANCE_HOME_URL = "https://finance.naver.com/"
 NAVER_MAIN_NEWS_URL = "https://finance.naver.com/news/mainnews.naver"
 GITHUB_PAGES_NEWS_URL = "https://saechimdaeki.github.io/daily-market-briefing/daily_news_digest.json"
 KST = pytz.timezone("Asia/Seoul")
@@ -25,14 +26,28 @@ def _safe_get(url, params=None, timeout=10):
     return response
 
 
-def fetch_naver_finance_main_news(limit=18):
-    response = _safe_get(NAVER_MAIN_NEWS_URL)
+def _normalize_naver_news_url(url):
+    if not url:
+        return ""
+    absolute = urljoin(NAVER_FINANCE_HOME_URL, url)
+    parsed = urlparse(absolute)
+    if parsed.netloc == "finance.naver.com" and parsed.path.endswith("/news/news_read.naver"):
+        query = parse_qs(parsed.query)
+        office_id = (query.get("office_id") or [""])[0]
+        article_id = (query.get("article_id") or [""])[0]
+        if office_id and article_id:
+            return f"https://n.news.naver.com/mnews/article/{office_id}/{article_id}"
+    return absolute
+
+
+def fetch_naver_finance_home_news(limit=8):
+    response = _safe_get(NAVER_FINANCE_HOME_URL)
     response.encoding = "euc-kr"
     soup = BeautifulSoup(response.text, "html.parser")
 
     news_items = []
     seen_urls = set()
-    rows = soup.select("ul.newsList li") or soup.select("div.mainNewsList li") or soup.select("dd.articleSubject")
+    rows = soup.select("div.news_area div.section_strategy ul li")
 
     for row in rows:
         anchor = row.select_one("a")
@@ -44,7 +59,53 @@ def fetch_naver_finance_main_news(limit=18):
         if not title or not href:
             continue
 
-        url = urljoin(NAVER_MAIN_NEWS_URL, href)
+        url = _normalize_naver_news_url(href)
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        news_items.append(
+            {
+                "title": title,
+                "url": url,
+                "publisher": "",
+                "published_at": "",
+                "snippet": "",
+                "image_url": "",
+                "source_type": "KR_HOME",
+            }
+        )
+
+        if len(news_items) >= limit:
+            break
+
+    return news_items
+
+
+def fetch_naver_finance_main_news(limit=18):
+    response = _safe_get(NAVER_MAIN_NEWS_URL)
+    response.encoding = "euc-kr"
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    news_items = []
+    seen_urls = set()
+    rows = soup.select("ul.newsList li") or soup.select("div.mainNewsList li") or soup.select("dd.articleSubject")
+
+    for row in rows:
+        anchor = (
+            row.select_one("dd.articleSubject a")
+            or row.select_one(".articleSubject a")
+            or row.select_one("a")
+        )
+        if not anchor:
+            continue
+
+        title = _clean_text(anchor.get_text(" ", strip=True))
+        href = anchor.get("href", "")
+        if not title or not href:
+            continue
+
+        url = _normalize_naver_news_url(href)
         if url in seen_urls:
             continue
         seen_urls.add(url)
@@ -66,6 +127,12 @@ def fetch_naver_finance_main_news(limit=18):
             if date_node and date_node.get_text(strip=True) in snippet:
                 snippet = snippet.replace(date_node.get_text(strip=True), "").strip()
 
+        thumb_node = (
+            row.select_one("dt.thumb img")
+            or row.select_one(".thumb img")
+            or row.select_one("img")
+        )
+
         news_items.append(
             {
                 "title": title,
@@ -73,6 +140,7 @@ def fetch_naver_finance_main_news(limit=18):
                 "publisher": _clean_text(publisher_node.get_text(strip=True) if publisher_node else "네이버 금융"),
                 "published_at": _clean_text(date_node.get_text(strip=True) if date_node else ""),
                 "snippet": snippet,
+                "image_url": _clean_text(thumb_node.get("src")) if thumb_node and thumb_node.get("src") else "",
                 "source_type": "KR",
             }
         )
@@ -86,16 +154,20 @@ def fetch_naver_finance_main_news(limit=18):
 def enrich_article_metadata(article):
     enriched = dict(article)
     try:
-        response = _safe_get(article["url"])
+        response = _safe_get(_normalize_naver_news_url(article["url"]))
         response.encoding = response.apparent_encoding or response.encoding
         soup = BeautifulSoup(response.text, "html.parser")
 
         og_image = soup.select_one('meta[property="og:image"]')
         og_desc = soup.select_one('meta[property="og:description"]')
         og_title = soup.select_one('meta[property="og:title"]')
+        og_author = soup.select_one('meta[property="og:article:author"]')
         desc_meta = soup.select_one('meta[name="description"]')
+        publisher_node = soup.select_one(".media_end_head_top_logo")
+        published_node = soup.select_one("._ARTICLE_DATE_TIME") or soup.select_one(".media_end_head_info_datestamp_time")
 
         body_selectors = [
+            "#dic_area",
             "#newsct_article",
             "#content",
             ".articleCont",
@@ -110,11 +182,22 @@ def enrich_article_metadata(article):
                 if body_text:
                     break
 
+        publisher = _clean_text(publisher_node.get_text(" ", strip=True) if publisher_node else "")
+        if not publisher and og_author and og_author.get("content"):
+            publisher = _clean_text(og_author.get("content").split("|")[0])
+
         enriched["title"] = _clean_text(og_title.get("content")) if og_title and og_title.get("content") else enriched["title"]
+        enriched["url"] = response.url
         if og_image and og_image.get("content"):
             enriched["image_url"] = urljoin(response.url, _clean_text(og_image.get("content")))
         else:
-            enriched["image_url"] = ""
+            enriched["image_url"] = article.get("image_url", "")
+        enriched["publisher"] = publisher or article.get("publisher", "")
+        enriched["published_at"] = _clean_text(
+            published_node.get("data-date-time") if published_node and published_node.get("data-date-time") else (
+                published_node.get_text(" ", strip=True) if published_node else article.get("published_at", "")
+            )
+        )
         enriched["description"] = _clean_text(
             (og_desc.get("content") if og_desc and og_desc.get("content") else "")
             or (desc_meta.get("content") if desc_meta and desc_meta.get("content") else "")
@@ -270,7 +353,9 @@ def build_daily_news_digest(client, market_snapshot, is_morning, max_items=4):
             "items": [],
         }
 
-    raw_articles = fetch_naver_finance_main_news(limit=18)
+    raw_articles = fetch_naver_finance_home_news(limit=8)
+    if not raw_articles:
+        raw_articles = fetch_naver_finance_main_news(limit=18)
     enriched = _dedupe_articles([enrich_article_metadata(article) for article in raw_articles])
     selected = select_major_market_news(
         client=client,

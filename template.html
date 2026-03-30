@@ -558,7 +558,7 @@
                 {% for article in daily_news_items %}
                 <article class="news-item">
                     {% if article.image_url %}
-                    <img src="{{ article.image_url }}" alt="{{ article.title }}" class="news-thumb">
+                    <img src="{{ article.image_url|e }}" alt="{{ article.title|e }}" class="news-thumb">
                     {% else %}
                     <div class="news-thumb"></div>
                     {% endif %}
@@ -574,13 +574,13 @@
                             <span>{{ article.published_at }}</span>
                             {% endif %}
                         </div>
-                        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="news-title">{{ article.title }}</a>
+                        <a href="{{ article.url|e }}" target="_blank" rel="noopener noreferrer" class="news-title">{{ article.title }}</a>
                         {% if article.why_it_matters %}
                         <div class="news-why">{{ article.why_it_matters }}</div>
                         {% elif article.summary %}
                         <div class="news-summary">{{ article.summary }}</div>
                         {% endif %}
-                        <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                        <a href="{{ article.url|e }}" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
                     </div>
                 </article>
                 {% endfor %}
