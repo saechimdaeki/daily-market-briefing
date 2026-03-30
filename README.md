@@ -28,11 +28,15 @@
 
 ### 2. MS Teams 데일리 마켓 브리핑 (Daily Alert)
 매일 아침/저녁 주요 지수 요약 및 만화 생성
-<img width="311" height="623" alt="daily_alert" src="https://github.com/user-attachments/assets/43a93c4a-0ca9-4dee-8356-20d4a2c9cec3" />
+
+<img width="600" height="579" alt="image" src="https://github.com/user-attachments/assets/7759ceb0-461a-4e62-a7f7-22132de6dc08" />
+
 
 ### 3. Premium Web Dashboard
 GitHub Pages로 자동 배포되는 데일리 리포트 웹페이지
-<img width="436" height="803" alt="web_dashboard" src="https://github.com/user-attachments/assets/79fcc5fd-976a-4b6f-8c16-da416655f46b" />
+
+<img width="665" height="673" alt="image" src="https://github.com/user-attachments/assets/221249a2-ded0-4191-b4c5-bbc40dc9a7ca" />
+
 
 ---
 
