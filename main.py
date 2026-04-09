@@ -1,5 +1,6 @@
 import os
 import json
+import math
 import requests
 import yfinance as yf
 from datetime import datetime
@@ -252,10 +253,16 @@ def get_korean_index_data(market_type):
 # 🟢 yfinance API (미장 및 ETF용)
 def get_index_data(ticker):
     try:
-        data = yf.Ticker(ticker).history(period="5d")
-        if len(data) >= 2:
-            today_close = data['Close'].iloc[-1]
-            yesterday_close = data['Close'].iloc[-2]
+        data = yf.Ticker(ticker).history(period="7d", interval="1d")
+        closes = data["Close"].dropna()
+
+        if len(closes) >= 2:
+            today_close = float(closes.iloc[-1])
+            yesterday_close = float(closes.iloc[-2])
+
+            if not math.isfinite(today_close) or not math.isfinite(yesterday_close) or yesterday_close == 0:
+                raise ValueError("유효하지 않은 종가 데이터")
+
             diff = today_close - yesterday_close
             pct_change = (diff / yesterday_close) * 100
             
@@ -272,8 +279,9 @@ def get_index_data(ticker):
                 "color": color,
                 "trend": trend
             }
-    except Exception:
-        pass
+        print(f"yfinance 유효 종가 부족: {ticker}")
+    except Exception as e:
+        print(f"yfinance 데이터 조회 실패 ({ticker}): {e}")
     return {"price": "N/A", "change": "", "color": "#000", "trend": ""}
 
 # 데이터 수집 (국장은 네이버, 미장은 야후)
