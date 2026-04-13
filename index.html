@@ -418,6 +418,168 @@
         .summary-list li::before { content: "•"; position: absolute; left: 0; top: 1px; font-size: 1.25rem; color: #2563eb; }
         strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
 
+        /* ── Agent Execution Flow ─────────────────────────────── */
+        .agent-flow-section {
+            background: var(--surface);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+            padding: 20px 22px 22px;
+            margin-top: 1.5rem;
+        }
+        .agent-flow-section summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            list-style: none;
+            outline: none;
+        }
+        .agent-flow-section summary::-webkit-details-marker { display: none; }
+        .agent-flow-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .agent-flow-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .agent-flow-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .agent-flow-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+        }
+        .agent-total-time {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        /* 그래프 다이어그램 */
+        .graph-diagram {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin-top: 18px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .graph-step {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .graph-parallel-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .graph-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(96, 165, 250, 0.35);
+            background: rgba(239, 246, 255, 0.7);
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .graph-node.success { border-color: #10b981; background: rgba(209, 250, 229, 0.55); }
+        .graph-node.error   { border-color: #ef4444; background: rgba(254, 226, 226, 0.55); }
+        .graph-node.conditional {
+            border-style: dashed;
+            border-color: rgba(245, 158, 11, 0.6);
+            background: rgba(255, 251, 235, 0.65);
+        }
+        .graph-node.conditional.success { border-color: #10b981; border-style: dashed; }
+        .graph-node-icon  { font-size: 1.15rem; line-height: 1; }
+        .graph-node-label { font-size: 0.74rem; font-weight: 700; color: #334155; }
+        .graph-node-time  {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.07);
+            color: #475569;
+        }
+        .graph-node-time.success { background: rgba(16, 185, 129, 0.12); color: #065f46; }
+        .graph-node-time.error   { background: rgba(239, 68,  68,  0.12); color: #991b1b; }
+        .graph-arrow {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+        .graph-parallel-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 0 4px;
+        }
+        .graph-parallel-arrow span { color: #94a3b8; font-size: 0.85rem; line-height: 1; }
+        /* 실행 로그 테이블 */
+        .exec-log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 0.83rem;
+        }
+        .exec-log-table th {
+            text-align: left;
+            padding: 7px 10px;
+            background: rgba(241, 245, 249, 0.9);
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.74rem;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+        }
+        .exec-log-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            color: #374151;
+            vertical-align: middle;
+        }
+        .exec-log-table tr:last-child td { border-bottom: none; }
+        .exec-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .exec-status-badge.success { background: rgba(16,185,129,0.12); color: #065f46; }
+        .exec-status-badge.error   { background: rgba(239,68,68,0.12);  color: #991b1b; }
+        .exec-duration { font-variant-numeric: tabular-nums; font-weight: 700; color: #1d4ed8; }
+        .exec-errors {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(254, 226, 226, 0.5);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 0.82rem;
+            color: #991b1b;
+        }
+
         @media (max-width: 1199.98px) {
             .feature-grid {
                 grid-template-columns: 1fr;
@@ -501,12 +663,12 @@
             <div class="hero-layout">
                 <div class="hero-copy">
                     <div class="hero-kicker">Seoul and Wall Street pulse, reframed as a daily cover story</div>
-                    <h1 class="header-title">Evening Briefing: 오늘 국장 실시간 & 미장 프리뷰</h1>
-                    <p class="header-subtitle">마지막 업데이트: 2026-04-13 16:41:43</p>
+                    <h1 class="header-title">Morning Briefing: 간밤의 미장 & 국장 프리뷰</h1>
+                    <p class="header-subtitle">마지막 업데이트: 2026-04-14 07:55:45</p>
                 </div>
                 <div class="hero-stamp">
                     <div class="hero-stamp-label">Edition Focus</div>
-                    <div class="hero-stamp-value">혼조 속에서 보수적 선택의 아이러니</div>
+                    <div class="hero-stamp-value">미국 상승, 코스피 하락의 아이러니</div>
                 </div>
             </div>
         </section>
@@ -525,23 +687,23 @@
             </div>
             <div class="index-card">
                 <div class="index-title">EWY (한국ETF)</div>
-                <div class="index-value">138.73</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 0.56 (-0.40%)</div>
+                <div class="index-value">141.23</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 2.50 (+1.80%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">S&P 500</div>
-                <div class="index-value">6,816.89</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 7.77 (-0.11%)</div>
+                <div class="index-value">6,886.24</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 69.35 (+1.02%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">DOW JONES</div>
-                <div class="index-value">47,916.57</div>
-                <div class="index-badge" style="color: #3b82f6; background-color: #3b82f615;">▼ 269.23 (-0.56%)</div>
+                <div class="index-value">48,218.25</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 301.68 (+0.63%)</div>
             </div>
             <div class="index-card">
                 <div class="index-title">NASDAQ</div>
-                <div class="index-value">22,902.89</div>
-                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 80.47 (+0.35%)</div>
+                <div class="index-value">23,183.74</div>
+                <div class="index-badge" style="color: #ef4444; background-color: #ef444415;">▲ 280.85 (+1.23%)</div>
             </div>
         </section>
 
@@ -558,97 +720,97 @@
                 
                 <article class="news-item">
                     
-                    <img src="https://imgnews.pstatic.net/image/021/2026/04/13/0002784163_001_20260413100010481.jpg?type=w800" alt="“다 팔아버릴까” VS “오늘이 기회?”…종전 무산에 코스피 향방은" class="news-thumb">
+                    <img src="https://imgnews.pstatic.net/image/018/2026/04/14/0006256694_001_20260414074013966.jpg?type=w800" alt="SK하이닉스, 실적 가속 구간 진입…외국인 순매수 이어진다-KB" class="news-thumb">
                     
                     <div class="news-body">
                         <div class="news-meta">
                             
-                            <span class="news-scope">Korea</span>
+                            <span class="news-scope">Korea | Sector</span>
                             
                             
-                            <span>문화일보</span>
+                            <span>이데일리</span>
                             
                             
-                            <span>2026-04-13 10:00:10</span>
+                            <span>2026-04-14 07:40:13</span>
                             
                         </div>
-                        <a href="https://n.news.naver.com/mnews/article/021/0002784163" target="_blank" rel="noopener noreferrer" class="news-title">“다 팔아버릴까” VS “오늘이 기회?”…종전 무산에 코스피 향방은</a>
+                        <a href="https://n.news.naver.com/mnews/article/018/0006256694" target="_blank" rel="noopener noreferrer" class="news-title">SK하이닉스, 실적 가속 구간 진입…외국인 순매수 이어진다-KB</a>
                         
-                        <div class="news-why">미국과 이란 간의 종전 협상 결렬이 코스피에 큰 영향을 미치고 있다.</div>
+                        <div class="news-why">SK하이닉스의 실적 가속화는 반도체 시장 전반에 긍정적인 신호를 줄 수 있다.</div>
                         
-                        <a href="https://n.news.naver.com/mnews/article/021/0002784163" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                        <a href="https://n.news.naver.com/mnews/article/018/0006256694" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
                     </div>
                 </article>
                 
                 <article class="news-item">
                     
-                    <img src="https://imgnews.pstatic.net/image/011/2026/04/13/0004610014_001_20260413094710798.jpg?type=w800" alt="“중동 재건 기회 언제쯤”…건설주, 이란 협상 결렬에 3% ‘뚝’ [이런국장 저런주식]" class="news-thumb">
+                    <img src="https://imgnews.pstatic.net/image/648/2026/04/14/0000046219_001_20260414074015166.jpg?type=w800" alt="코인거래소 떠나는 대주주들…&#34;신사업 찾아라&#34;" class="news-thumb">
                     
                     <div class="news-body">
                         <div class="news-meta">
                             
-                            <span class="news-scope">Sector</span>
+                            <span class="news-scope">Korea | Sector</span>
                             
                             
-                            <span>서울경제</span>
+                            <span>비즈워치</span>
                             
                             
-                            <span>2026-04-13 09:47:10</span>
+                            <span>2026-04-14 07:40:15</span>
                             
                         </div>
-                        <a href="https://n.news.naver.com/mnews/article/011/0004610014" target="_blank" rel="noopener noreferrer" class="news-title">“중동 재건 기회 언제쯤”…건설주, 이란 협상 결렬에 3% ‘뚝’ [이런국장 저런주식]</a>
+                        <a href="https://n.news.naver.com/mnews/article/648/0000046219" target="_blank" rel="noopener noreferrer" class="news-title">코인거래소 떠나는 대주주들…"신사업 찾아라"</a>
                         
-                        <div class="news-why">건설주가 중동 재건 기대감 약화로 큰 하락세를 보이고 있다.</div>
+                        <div class="news-why">가상자산 거래소 대주주들의 지분 매각은 시장의 신뢰도와 향후 성장성에 영향을 미칠 수 있다.</div>
                         
-                        <a href="https://n.news.naver.com/mnews/article/011/0004610014" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                        <a href="https://n.news.naver.com/mnews/article/648/0000046219" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
                     </div>
                 </article>
                 
                 <article class="news-item">
                     
-                    <img src="https://imgnews.pstatic.net/image/243/2026/04/13/0000096236_001_20260413094413064.jpg?type=w800" alt="&#39;종전 결렬&#39;에 주가 와르르…삼전·SK하닉 3%나 빠졌다" class="news-thumb">
+                    <img src="https://imgnews.pstatic.net/image/277/2026/04/14/0005748901_001_20260414074115261.jpg?type=w800" alt="[비트코인 지금]업비트·빗썸 훅 떨어졌네" class="news-thumb">
                     
                     <div class="news-body">
                         <div class="news-meta">
                             
-                            <span class="news-scope">Korea</span>
+                            <span class="news-scope">Korea | Sector</span>
                             
                             
-                            <span>이코노미스트</span>
+                            <span>아시아경제</span>
                             
                             
-                            <span>2026-04-13 09:44:13</span>
+                            <span>2026-04-14 07:40:00</span>
                             
                         </div>
-                        <a href="https://n.news.naver.com/mnews/article/243/0000096236" target="_blank" rel="noopener noreferrer" class="news-title">'종전 결렬'에 주가 와르르…삼전·SK하닉 3%나 빠졌다</a>
+                        <a href="https://n.news.naver.com/mnews/article/277/0005748901" target="_blank" rel="noopener noreferrer" class="news-title">[비트코인 지금]업비트·빗썸 훅 떨어졌네</a>
                         
-                        <div class="news-why">지정학적 긴장이 반도체 대형주에 부정적인 영향을 미치고 있다.</div>
+                        <div class="news-why">가상자산 거래소의 수익성 악화는 디지털 자산 시장의 전반적인 건강성을 나타낸다.</div>
                         
-                        <a href="https://n.news.naver.com/mnews/article/243/0000096236" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                        <a href="https://n.news.naver.com/mnews/article/277/0005748901" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
                     </div>
                 </article>
                 
                 <article class="news-item">
                     
-                    <img src="https://imgnews.pstatic.net/image/014/2026/04/13/0005506511_001_20260413094320707.jpg?type=w800" alt="역대급 실적인데...외국인은 왜 삼성전자를 팔아치울까" class="news-thumb">
+                    <img src="https://imgnews.pstatic.net/image/018/2026/04/14/0006256693_001_20260414074011555.jpg?type=w800" alt="한화오션, 해양·특수선 수주 여부 관건…선제 매수 기회-SK" class="news-thumb">
                     
                     <div class="news-body">
                         <div class="news-meta">
                             
-                            <span class="news-scope">Korea</span>
+                            <span class="news-scope">Korea | Sector</span>
                             
                             
-                            <span>파이낸셜뉴스</span>
+                            <span>이데일리</span>
                             
                             
-                            <span>2026-04-13 09:31:20</span>
+                            <span>2026-04-14 07:40:11</span>
                             
                         </div>
-                        <a href="https://n.news.naver.com/mnews/article/014/0005506511" target="_blank" rel="noopener noreferrer" class="news-title">역대급 실적인데...외국인은 왜 삼성전자를 팔아치울까</a>
+                        <a href="https://n.news.naver.com/mnews/article/018/0006256693" target="_blank" rel="noopener noreferrer" class="news-title">한화오션, 해양·특수선 수주 여부 관건…선제 매수 기회-SK</a>
                         
-                        <div class="news-why">삼성전자의 역대급 실적에도 불구하고 외국인 매도가 지속되고 있다.</div>
+                        <div class="news-why">한화오션의 수주 여부는 조선업계의 향후 전망에 중요한 영향을 미칠 수 있다.</div>
                         
-                        <a href="https://n.news.naver.com/mnews/article/014/0005506511" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
+                        <a href="https://n.news.naver.com/mnews/article/018/0006256693" target="_blank" rel="noopener noreferrer" class="news-link">원문 보기</a>
                     </div>
                 </article>
                 
@@ -669,7 +831,7 @@
                     <img src="cover.png" class="cover-img" alt="Market Illustration">
                     <div class="cover-overlay">
                         <div class="cover-overlay-badge">Market Signal</div>
-                        <div class="cover-overlay-headline">혼조 속에서 보수적 선택의 아이러니</div>
+                        <div class="cover-overlay-headline">미국 상승, 코스피 하락의 아이러니</div>
                     </div>
                 </div>
             </section>
@@ -677,25 +839,217 @@
             <section class="summary-card">
                 <div class="summary-header">
                     <div class="summary-kicker">Topline Brief</div>
-                    <div class="summary-title">혼조 속에서 보수적 선택의 아이러니</div>
+                    <div class="summary-title">미국 상승, 코스피 하락의 아이러니</div>
                 </div>
                 <div class="summary-body">
                     <ul class="summary-list">
                         
-                        <li>한국 시장은 오늘 <strong>코스피</strong>가 5,808.62로 하락하면서 -0.86%의 낙폭을 보였고, <strong>코스닥</strong>은 1,099.84로 소폭 상승 (+0.57%)세를 유지했습니다.</li>
+                        <li>미국 시장<strong>이 간밤에 긍정적인 흐름을 보이며 S&P500과 나스닥이 각각 </strong>1.02%<strong> 및 </strong>1.23%<strong> 상승한 가운데, 한국 야간지표인 </strong>EWY<strong> 또한 </strong>1.80%** 상승하여 한국 투자자들에게 긍정적인 신호를 전달하고 있습니다.</li>
                         
-                        <li>미국 시장의 <strong>S&P500</strong>과 <strong>다우존스</strong> 지수는 각각 -0.11%와 -0.56%의 하락을 기록한 반면, <strong>나스닥</strong>은 0.35% 상승하여 전반적으로 혼조세를 나타냈습니다.</li>
+                        <li>현재 <strong>코스피</strong>는 <strong>50.25포인트</strong> 하락하며 <strong>0.86%</strong> 감소한 상황이며, <strong>코스닥</strong>은 <strong>6.21포인트</strong> 상승하여 <strong>0.57%</strong> 증가했습니다. 이는 투자자들이 <strong>코스닥</strong>의 상대적인 강세를 주목해야 함을 나타냅니다.</li>
                         
-                        <li>한국 야간지표(EWY)는 138.73로 -0.40% 하락하며, 미장 흐름과 함께 <strong>매도 심리</strong>를 자극하는 신호로 작용했습니다.</li>
+                        <li>미국 시장의 상승세에도 불구하고 <strong>코스피</strong>가 하락한 것은 시장의 <strong>온도 차이</strong>를 보여주며, 이는 국내 투자자들이 조정 국면에서 방어적인 포지션을 취해야 함을 시사합니다.</li>
                         
-                        <li>코스피와 코스닥의 대조적인 흐름은 오늘 투자자들에게 <strong>보수적인 접근</strong>을 권장하며, 코스닥의 상승세는 특정 <strong>성장주</strong>에 대한 희망적인 신호로 해석할 수 있습니다.</li>
+                        <li>오늘 <strong>코스닥</strong>의 상승세를 활용하여 기술주 중심의 <strong>선택과 집중</strong> 전략을 구사하는 것이 유리하며, 특히 성장 가능성이 높은 기업에 대한 비중을 늘리는 것이 좋습니다.</li>
                         
-                        <li>결국, 오늘 밤 <strong>미국 시장</strong>의 추가적인 주가 변동성과 유럽 시장의 반응을 주의 깊게 살펴보며 포트폴리오의 <strong>리스크 관리</strong>를 최우선으로 두는 것이 중요합니다.</li>
+                        <li>전반적으로, 미국 시장의 긍정적인 분위기에도 불구하고 <strong>코스피</strong>의 약세가 지속될 경우, 투자자들은 <strong>리스크 관리</strong>를 철저히 하며 포트폴리오 다각화를 고려해야 합니다.</li>
                         
                     </ul>
                 </div>
             </section>
         </div>
+
+        
+        <details class="agent-flow-section">
+            <summary>
+                <div class="agent-flow-header">
+                    <span class="agent-flow-title">🤖 LangGraph Agent 실행 흐름</span>
+                    <div class="agent-flow-meta">
+                        <span class="agent-flow-badge">StateGraph</span>
+                        
+                        <span class="agent-total-time">총 78,906ms</span>
+                        
+                    </div>
+                </div>
+            </summary>
+
+            
+            <div class="graph-diagram">
+
+                
+                
+                <div class="graph-step">
+                    <div class="graph-node success">
+                        <span class="graph-node-icon">📊</span>
+                        <span class="graph-node-label">시장 데이터 수집</span>
+                        
+                        <span class="graph-node-time success">2573ms</span>
+                        
+                    </div>
+                </div>
+
+                
+                <div class="graph-parallel-arrow">
+                    <span>→</span><span>→</span>
+                </div>
+
+                
+                
+                
+                <div class="graph-step">
+                    <div class="graph-parallel-group">
+                        <div class="graph-node success">
+                            <span class="graph-node-icon">🤖</span>
+                            <span class="graph-node-label">AI 시장 분석</span>
+                            
+                            <span class="graph-node-time success">8148ms</span>
+                            
+                        </div>
+                        <div class="graph-node success">
+                            <span class="graph-node-icon">📰</span>
+                            <span class="graph-node-label">뉴스 수집 & 큐레이션</span>
+                            
+                            <span class="graph-node-time success">19772ms</span>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="graph-parallel-arrow">
+                    <span>→</span><span>→</span>
+                </div>
+
+                
+                
+                <div class="graph-step">
+                    <div class="graph-node success">
+                        <span class="graph-node-icon">🎨</span>
+                        <span class="graph-node-label">이미지 방향 설계</span>
+                        
+                        <span class="graph-node-time success">8132ms</span>
+                        
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                
+                
+                <div class="graph-step">
+                    <div class="graph-node success">
+                        <span class="graph-node-icon">🖼️</span>
+                        <span class="graph-node-label">DALL-E 이미지 생성</span>
+                        
+                        <span class="graph-node-time success">40281ms</span>
+                        
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                
+                
+                <div class="graph-step">
+                    <div class="graph-node ">
+                        <span class="graph-node-icon">📄</span>
+                        <span class="graph-node-label">HTML 렌더링</span>
+                        
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                
+                
+                <div class="graph-step">
+                    <div class="graph-node conditional ">
+                        <span class="graph-node-icon">🔔</span>
+                        <span class="graph-node-label">Teams 알림</span>
+                        
+                        <span class="graph-node-time">조건부</span>
+                        
+                    </div>
+                </div>
+
+            </div>
+
+            
+            
+            <table class="exec-log-table">
+                <thead>
+                    <tr>
+                        <th>노드</th>
+                        <th>상태</th>
+                        <th>소요 시간</th>
+                        <th>결과</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">시장 데이터 수집</strong></td>
+                        <td>
+                            <span class="exec-status-badge success">
+                                ✅ success
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">2,573ms</span></td>
+                        <td style="color:#475569;">KOSPI 5,808.62 | KOSDAQ 1,099.84 | S&P500 6,886.24</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">AI 시장 분석</strong></td>
+                        <td>
+                            <span class="exec-status-badge success">
+                                ✅ success
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">8,148ms</span></td>
+                        <td style="color:#475569;">요약 5포인트 | 헤드라인: 미국 상승, 코스피 하락의 아이러니</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">뉴스 수집 & 큐레이션</strong></td>
+                        <td>
+                            <span class="exec-status-badge success">
+                                ✅ success
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">19,772ms</span></td>
+                        <td style="color:#475569;">4건 선정 (스크래핑 + LLM 큐레이션)</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">이미지 방향 설계</strong></td>
+                        <td>
+                            <span class="exec-status-badge success">
+                                ✅ success
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">8,132ms</span></td>
+                        <td style="color:#475569;">catalyst: 미국 시장 상승세</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">DALL-E 이미지 생성</strong></td>
+                        <td>
+                            <span class="exec-status-badge success">
+                                ✅ success
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">40,281ms</span></td>
+                        <td style="color:#475569;">1024×1024 커버 이미지 저장 완료</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+            
+
+            
+            
+
+        </details>
     </div>
 </body>
 </html>
