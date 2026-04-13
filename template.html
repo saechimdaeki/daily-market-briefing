@@ -418,6 +418,168 @@
         .summary-list li::before { content: "•"; position: absolute; left: 0; top: 1px; font-size: 1.25rem; color: #2563eb; }
         strong { color: #1d4ed8; font-weight: 700; background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
 
+        /* ── Agent Execution Flow ─────────────────────────────── */
+        .agent-flow-section {
+            background: var(--surface);
+            border-radius: 22px;
+            box-shadow: var(--card-shadow);
+            border: var(--panel-border);
+            padding: 20px 22px 22px;
+            margin-top: 1.5rem;
+        }
+        .agent-flow-section summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            list-style: none;
+            outline: none;
+        }
+        .agent-flow-section summary::-webkit-details-marker { display: none; }
+        .agent-flow-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .agent-flow-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .agent-flow-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .agent-flow-badge {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(37, 99, 235, 0.08);
+            color: #1d4ed8;
+        }
+        .agent-total-time {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+        }
+        /* 그래프 다이어그램 */
+        .graph-diagram {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0;
+            margin-top: 18px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .graph-step {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .graph-parallel-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .graph-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1.5px solid rgba(96, 165, 250, 0.35);
+            background: rgba(239, 246, 255, 0.7);
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+            transition: border-color 0.2s;
+        }
+        .graph-node.success { border-color: #10b981; background: rgba(209, 250, 229, 0.55); }
+        .graph-node.error   { border-color: #ef4444; background: rgba(254, 226, 226, 0.55); }
+        .graph-node.conditional {
+            border-style: dashed;
+            border-color: rgba(245, 158, 11, 0.6);
+            background: rgba(255, 251, 235, 0.65);
+        }
+        .graph-node.conditional.success { border-color: #10b981; border-style: dashed; }
+        .graph-node-icon  { font-size: 1.15rem; line-height: 1; }
+        .graph-node-label { font-size: 0.74rem; font-weight: 700; color: #334155; }
+        .graph-node-time  {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.07);
+            color: #475569;
+        }
+        .graph-node-time.success { background: rgba(16, 185, 129, 0.12); color: #065f46; }
+        .graph-node-time.error   { background: rgba(239, 68,  68,  0.12); color: #991b1b; }
+        .graph-arrow {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+        .graph-parallel-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 0 4px;
+        }
+        .graph-parallel-arrow span { color: #94a3b8; font-size: 0.85rem; line-height: 1; }
+        /* 실행 로그 테이블 */
+        .exec-log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 0.83rem;
+        }
+        .exec-log-table th {
+            text-align: left;
+            padding: 7px 10px;
+            background: rgba(241, 245, 249, 0.9);
+            color: #475569;
+            font-weight: 700;
+            font-size: 0.74rem;
+            letter-spacing: 0.04em;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+        }
+        .exec-log-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+            color: #374151;
+            vertical-align: middle;
+        }
+        .exec-log-table tr:last-child td { border-bottom: none; }
+        .exec-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .exec-status-badge.success { background: rgba(16,185,129,0.12); color: #065f46; }
+        .exec-status-badge.error   { background: rgba(239,68,68,0.12);  color: #991b1b; }
+        .exec-duration { font-variant-numeric: tabular-nums; font-weight: 700; color: #1d4ed8; }
+        .exec-errors {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(254, 226, 226, 0.5);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 0.82rem;
+            color: #991b1b;
+        }
+
         @media (max-width: 1199.98px) {
             .feature-grid {
                 grid-template-columns: 1fr;
@@ -620,6 +782,163 @@
                 </div>
             </section>
         </div>
+
+        {# ── Agent Execution Flow ────────────────────────────────────────── #}
+        <details class="agent-flow-section">
+            <summary>
+                <div class="agent-flow-header">
+                    <span class="agent-flow-title">🤖 LangGraph Agent 실행 흐름</span>
+                    <div class="agent-flow-meta">
+                        <span class="agent-flow-badge">StateGraph</span>
+                        {% if total_execution_ms %}
+                        <span class="agent-total-time">총 {{ "{:,}".format(total_execution_ms) }}ms</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </summary>
+
+            {# 정적 그래프 다이어그램 (노드별 실행 결과 오버레이) #}
+            <div class="graph-diagram">
+
+                {# 1. collect_market_data #}
+                {% set n = execution_log_map.get('collect_market_data', {}) %}
+                <div class="graph-step">
+                    <div class="graph-node {{ n.get('status', '') }}">
+                        <span class="graph-node-icon">📊</span>
+                        <span class="graph-node-label">시장 데이터 수집</span>
+                        {% if n %}
+                        <span class="graph-node-time {{ n.get('status','') }}">{{ n.duration_ms }}ms</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# 병렬 fan-out 화살표 #}
+                <div class="graph-parallel-arrow">
+                    <span>→</span><span>→</span>
+                </div>
+
+                {# 2. 병렬 그룹: analyze_market + fetch_and_curate_news #}
+                {% set n_a = execution_log_map.get('analyze_market', {}) %}
+                {% set n_n = execution_log_map.get('fetch_and_curate_news', {}) %}
+                <div class="graph-step">
+                    <div class="graph-parallel-group">
+                        <div class="graph-node {{ n_a.get('status', '') }}">
+                            <span class="graph-node-icon">🤖</span>
+                            <span class="graph-node-label">AI 시장 분석</span>
+                            {% if n_a %}
+                            <span class="graph-node-time {{ n_a.get('status','') }}">{{ n_a.duration_ms }}ms</span>
+                            {% endif %}
+                        </div>
+                        <div class="graph-node {{ n_n.get('status', '') }}">
+                            <span class="graph-node-icon">📰</span>
+                            <span class="graph-node-label">뉴스 수집 & 큐레이션</span>
+                            {% if n_n %}
+                            <span class="graph-node-time {{ n_n.get('status','') }}">{{ n_n.duration_ms }}ms</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {# 병렬 fan-in 화살표 #}
+                <div class="graph-parallel-arrow">
+                    <span>→</span><span>→</span>
+                </div>
+
+                {# 3. build_visual_brief #}
+                {% set n = execution_log_map.get('build_visual_brief', {}) %}
+                <div class="graph-step">
+                    <div class="graph-node {{ n.get('status', '') }}">
+                        <span class="graph-node-icon">🎨</span>
+                        <span class="graph-node-label">이미지 방향 설계</span>
+                        {% if n %}
+                        <span class="graph-node-time {{ n.get('status','') }}">{{ n.duration_ms }}ms</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                {# 4. generate_image #}
+                {% set n = execution_log_map.get('generate_image', {}) %}
+                <div class="graph-step">
+                    <div class="graph-node {{ n.get('status', '') }}">
+                        <span class="graph-node-icon">🖼️</span>
+                        <span class="graph-node-label">DALL-E 이미지 생성</span>
+                        {% if n %}
+                        <span class="graph-node-time {{ n.get('status','') }}">{{ n.duration_ms }}ms</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                {# 5. render_html #}
+                {% set n = execution_log_map.get('render_html', {}) %}
+                <div class="graph-step">
+                    <div class="graph-node {{ n.get('status', '') }}">
+                        <span class="graph-node-icon">📄</span>
+                        <span class="graph-node-label">HTML 렌더링</span>
+                        {% if n %}
+                        <span class="graph-node-time {{ n.get('status','') }}">{{ n.duration_ms }}ms</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="graph-arrow">→</div>
+
+                {# 6. notify (조건부) #}
+                {% set n = execution_log_map.get('notify', {}) %}
+                <div class="graph-step">
+                    <div class="graph-node conditional {{ n.get('status', '') }}">
+                        <span class="graph-node-icon">🔔</span>
+                        <span class="graph-node-label">Teams 알림</span>
+                        {% if n %}
+                        <span class="graph-node-time {{ n.get('status','') }}">{{ n.duration_ms }}ms</span>
+                        {% else %}
+                        <span class="graph-node-time">조건부</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>{# /graph-diagram #}
+
+            {# 상세 실행 로그 테이블 #}
+            {% if execution_log %}
+            <table class="exec-log-table">
+                <thead>
+                    <tr>
+                        <th>노드</th>
+                        <th>상태</th>
+                        <th>소요 시간</th>
+                        <th>결과</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in execution_log %}
+                    <tr>
+                        <td><strong style="background:none;padding:0;color:#0f172a;">{{ log.label }}</strong></td>
+                        <td>
+                            <span class="exec-status-badge {{ log.status }}">
+                                {{ "✅ success" if log.status == "success" else "❌ error" }}
+                            </span>
+                        </td>
+                        <td><span class="exec-duration">{{ "{:,}".format(log.duration_ms) }}ms</span></td>
+                        <td style="color:#475569;">{{ log.detail }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+
+            {# 에러 목록 #}
+            {% if errors %}
+            <div class="exec-errors">
+                <strong>발생한 에러:</strong>
+                {% for err in errors %}<div>• {{ err }}</div>{% endfor %}
+            </div>
+            {% endif %}
+
+        </details>
     </div>
 </body>
 </html>

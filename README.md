@@ -42,16 +42,153 @@ GitHub Pages로 자동 배포되는 데일리 리포트 웹페이지
 
 ## 🛠 Tech Stack
 
-- **Language:** Python 3.10
-- **AI Models:** OpenAI GPT-4o-mini (Text Analysis), DALL-E 3 (Image Generation)
-- **Data & Scraping:** yfinance, pandas, BeautifulSoup4
-- **Template Engine:** Jinja2
-- **CI/CD & Hosting:** GitHub Actions, GitHub Pages
-- **Notification:** MS Teams (Incoming Webhook & Adaptive Cards)
+| 분류 | 기술 |
+|------|------|
+| **Language** | Python 3.10 |
+| **Agent Framework** | LangGraph (StateGraph), LangChain (LCEL) |
+| **AI Models** | OpenAI GPT-4o-mini (Text/JSON), DALL-E 3 (Image) |
+| **LLM Client** | langchain-openai (ChatOpenAI), openai SDK |
+| **Data & Scraping** | yfinance, pandas, BeautifulSoup4 |
+| **Template Engine** | Jinja2 |
+| **CI/CD & Hosting** | GitHub Actions, GitHub Pages |
+| **Notification** | MS Teams (Incoming Webhook & Adaptive Cards) |
 
 ---
 
-## ⚙️ How it Works (Two-Track Architecture)
+## ⚙️ How it Works
+
+### Track B: Daily Dashboard — LangGraph Multi-Agent Pipeline (`main.py` + `graph.py`)
+
+데일리 브리핑은 **LangGraph `StateGraph`** 기반의 멀티에이전트 파이프라인으로 동작합니다.  
+모든 노드는 `MarketBriefingState`(TypedDict)를 공유 상태로 주고받으며, 병렬 실행과 조건부 분기를 그래프 엣지로 선언합니다.
+
+#### 실행 흐름
+
+```
+START
+  │
+  ▼
+[📊 collect_market_data]          ← 네이버 금융 API(국장) + yfinance(미장/ETF)
+  │
+  ├──────────────────────────────┐  (fan-out: 병렬 실행)
+  ▼                              ▼
+[🤖 analyze_market]    [📰 fetch_and_curate_news]
+  LangChain LCEL                  네이버 금융 스크래핑
+  요약 3~5포인트                   + 본문 메타데이터 보강
+  헤드라인 생성                    + LLM 뉴스 4건 선정
+  │                              │
+  └──────────────────────────────┘  (fan-in: 두 노드 완료 후)
+  │
+  ▼
+[🎨 build_visual_brief]           ← LangChain LCEL (JsonOutputParser)
+  4컷 패널 blueprint JSON 생성     catalyst, mood, shot 방향 설계
+  → DALL-E 최종 프롬프트 포맷
+  │
+  ▼
+[🖼️ generate_image]               ← DALL-E-3 API, cover.png 저장
+  │
+  ▼
+[📄 render_html]                  ← Jinja2, execution_log 오버레이 포함
+  │
+  └─ TEAMS_WEBHOOK_URL 있음? ──▶ [🔔 notify]  Adaptive Card 전송
+                        없음? ──▶ END
+```
+
+#### 주요 설계 패턴
+
+**1. `MarketBriefingState` — 공유 상태 TypedDict**
+
+모든 노드의 입출력을 하나의 불변 State 객체로 관리합니다.  
+병렬 노드가 동시에 같은 리스트 필드에 쓰는 충돌을 `Annotated[list, operator.add]` reducer로 해결합니다.
+
+```python
+class MarketBriefingState(TypedDict):
+    kospi: dict
+    llm_summary_raw: str
+    daily_news_items: list
+    image_prompt: str
+    # 병렬 노드가 동시에 append해도 안전한 reducer
+    execution_log: Annotated[list, operator.add]
+    errors:        Annotated[list, operator.add]
+```
+
+**2. 병렬 fan-out / fan-in**
+
+`analyze_market`(GPT 분석)과 `fetch_and_curate_news`(스크래핑)는 서로 의존성이 없으므로 동시에 실행됩니다.  
+LangGraph는 두 노드가 모두 완료된 뒤 State를 merge하여 `build_visual_brief`로 넘깁니다.
+
+```python
+builder.add_edge("collect_market_data", "analyze_market")
+builder.add_edge("collect_market_data", "fetch_and_curate_news")
+# 두 노드 모두 완료되어야 build_visual_brief 실행
+builder.add_edge("analyze_market",        "build_visual_brief")
+builder.add_edge("fetch_and_curate_news", "build_visual_brief")
+```
+
+**3. LangChain LCEL (LangChain Expression Language)**
+
+`analyze_market`과 `build_visual_brief` 노드에서 `prompt | llm | parser` 체인 패턴으로 LLM을 호출합니다.
+
+```python
+# 시장 요약: 자연어 출력
+summary_chain = ChatPromptTemplate.from_messages([("user", "{input}")]) \
+    | ChatOpenAI(model="gpt-4o-mini") \
+    | StrOutputParser()
+
+# 이미지 방향 설계: JSON 출력
+brief_chain = ChatPromptTemplate.from_messages([("user", "{input}")]) \
+    | ChatOpenAI(model="gpt-4o-mini", temperature=0.9) \
+    | JsonOutputParser()
+```
+
+**4. 조건부 엣지**
+
+`TEAMS_WEBHOOK_URL` 환경변수 유무에 따라 `notify` 노드를 실행할지 결정합니다.
+
+```python
+builder.add_conditional_edges(
+    "render_html",
+    lambda s: "notify" if os.environ.get("TEAMS_WEBHOOK_URL") else END,
+    {"notify": "notify", END: END},
+)
+```
+
+**5. 실행 흐름 시각화**
+
+각 노드는 실행 후 `execution_log`에 소요 시간과 결과를 기록합니다.  
+렌더링된 `public/index.html` 하단 "LangGraph Agent 실행 흐름" 섹션에서 노드별 상태를 시각적으로 확인할 수 있습니다.
+
+```python
+return {
+    "execution_log": [{
+        "node": "collect_market_data",
+        "label": "시장 데이터 수집",
+        "status": "success",
+        "duration_ms": 1823,
+        "detail": "KOSPI 2,580 | KOSDAQ 742 | S&P500 5,123"
+    }],
+    ...
+}
+```
+
+#### 파일 구조
+
+```
+daily-market-briefing/
+├── agents/
+│   ├── state.py          # MarketBriefingState TypedDict + GRAPH_STRUCTURE
+│   ├── market_data.py    # [Node] 시장 데이터 수집
+│   ├── news.py           # [Node] 뉴스 수집 & 큐레이션
+│   ├── analysis.py       # [Node] AI 시장 분석 + 이미지 방향 설계 (LangChain LCEL)
+│   ├── image_gen.py      # [Node] DALL-E-3 이미지 생성
+│   ├── renderer.py       # [Node] Jinja2 HTML 렌더링
+│   └── notifier.py       # [Node] Teams Adaptive Card 전송
+├── graph.py              # StateGraph 조립 (엣지 + 조건부 분기)
+├── main.py               # 진입점: 초기 State 설정 → graph.invoke()
+└── daily_news_digest.py  # 뉴스 스크래핑 + GPT 큐레이션 유틸리티
+```
+
+---
 
 ### Track A: Real-time Monitor (`realtime_bot.py`)
 1. **[Data Ingestion]** 네이버 금융 메인 뉴스 헤드라인 실시간 크롤링
@@ -59,17 +196,11 @@ GitHub Pages로 자동 배포되는 데일리 리포트 웹페이지
 3. **[Quant Analysis]** `pandas`로 6개월치 데이터를 분석해 RSI, MACD, 볼린저 밴드 등 시그널 감지
 4. **[AI Briefing]** 강력한 시그널이 발생한 종목만 추려내어 AI 심층 브리핑 생성 후 Teams 전송
 
-### Track C: Teams Stock Command (`teams_stock_command.py`)
+### Track C: Teams Stock Command
 1. **[Command Trigger]** Teams Workflow 또는 Teams Outgoing Webhook이 `!주가 <종목명>` 메시지를 감지
 2. **[GitHub Dispatch]** `workflow_dispatch`로 GitHub Actions 실행
 3. **[Stock Resolution]** 종목명과 종목코드를 실제 상장사 기준으로 검증 및 보정
 4. **[Single-Stock Briefing]** 기술적 지표와 최근 이슈를 요약해 Teams Adaptive Card 전송
-
-### Track B: Daily Dashboard (`main.py`)
-1. **[Data Collection]** 글로벌 주요 4대 지수 종가 및 등락률 계산
-2. **[AI Summary & Comic]** 지수 기반 시황 요약 및 DALL-E 3 네컷 만화 생성
-3. **[Web Rendering]** HTML 템플릿에 주입 후 `public/index.html` 생성
-4. **[Deploy & Alert]** GitHub Pages 배포 및 Teams 데일리 브리핑 발송
 
 ---
 
