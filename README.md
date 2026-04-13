@@ -35,7 +35,7 @@
 ### 3. Premium Web Dashboard
 GitHub Pages로 자동 배포되는 데일리 리포트 웹페이지
 
-<img width="665" height="673" alt="image" src="https://github.com/user-attachments/assets/221249a2-ded0-4191-b4c5-bbc40dc9a7ca" />
+<img width="681" height="926" alt="image" src="https://github.com/user-attachments/assets/b98f78ed-ba75-4e0f-b31f-cce468eb2e5f" />
 
 
 ---
