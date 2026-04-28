@@ -112,6 +112,170 @@ def format_money(value, market):
         return f"$ {value:,.2f}"
     return f"₩ {value:,.2f}"
 
+
+def _safe_number(value):
+    if value is None:
+        return None
+    try:
+        if pd.isna(value):
+            return None
+    except Exception:
+        pass
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _first_numeric_from_mapping(mapping, keys):
+    if not mapping:
+        return None
+    for key in keys:
+        value = _safe_number(mapping.get(key))
+        if value is not None:
+            return value
+    return None
+
+
+def _extract_statement_value(frame, row_candidates):
+    if frame is None or getattr(frame, "empty", True):
+        return None
+    for row_name in row_candidates:
+        if row_name not in frame.index:
+            continue
+        series = frame.loc[row_name]
+        if isinstance(series, pd.DataFrame):
+            series = series.iloc[0]
+        for value in series.tolist():
+            numeric = _safe_number(value)
+            if numeric is not None:
+                return numeric
+    return None
+
+
+def format_compact_financial_value(value, market):
+    numeric = _safe_number(value)
+    if numeric is None:
+        return "확인 필요"
+
+    abs_value = abs(numeric)
+    if market == "US":
+        if abs_value >= 1_000_000_000_000:
+            formatted = f"${numeric / 1_000_000_000_000:.2f}T"
+        elif abs_value >= 1_000_000_000:
+            formatted = f"${numeric / 1_000_000_000:.2f}B"
+        elif abs_value >= 1_000_000:
+            formatted = f"${numeric / 1_000_000:.2f}M"
+        else:
+            formatted = f"${numeric:,.0f}"
+        return formatted
+
+    if abs_value >= 1_0000_0000_0000:
+        return f"{numeric / 1_0000_0000_0000:.2f}조원"
+    if abs_value >= 1_0000_0000:
+        return f"{numeric / 1_0000_0000:.0f}억원"
+    return f"{numeric:,.0f}원"
+
+
+def fetch_company_financial_profile(ticker, market):
+    try:
+        stock = yf.Ticker(ticker)
+        info = getattr(stock, "info", None) or {}
+    except Exception as e:
+        print(f"[{ticker}] 재무 프로필 조회 실패: {e}")
+        return None
+
+    market_cap = _first_numeric_from_mapping(info, ["marketCap"])
+    revenue = _first_numeric_from_mapping(info, ["totalRevenue"])
+    operating_income = _first_numeric_from_mapping(info, ["operatingIncome"])
+    cash = _first_numeric_from_mapping(
+        info,
+        ["totalCash", "cash", "cashAndCashEquivalents", "cashAndShortTermInvestments"],
+    )
+    debt = _first_numeric_from_mapping(info, ["totalDebt"])
+
+    income_stmt = None
+    balance_sheet = None
+    try:
+        income_stmt = getattr(stock, "quarterly_income_stmt", None)
+        if income_stmt is None or getattr(income_stmt, "empty", True):
+            income_stmt = getattr(stock, "income_stmt", None)
+    except Exception:
+        income_stmt = None
+
+    try:
+        balance_sheet = getattr(stock, "quarterly_balance_sheet", None)
+        if balance_sheet is None or getattr(balance_sheet, "empty", True):
+            balance_sheet = getattr(stock, "balance_sheet", None)
+    except Exception:
+        balance_sheet = None
+
+    if revenue is None:
+        revenue = _extract_statement_value(
+            income_stmt,
+            ["Total Revenue", "Operating Revenue", "Revenue"],
+        )
+    if operating_income is None:
+        operating_income = _extract_statement_value(
+            income_stmt,
+            ["Operating Income", "Operating Income Loss", "EBIT"],
+        )
+    if cash is None:
+        cash = _extract_statement_value(
+            balance_sheet,
+            [
+                "Cash And Cash Equivalents",
+                "Cash Cash Equivalents And Short Term Investments",
+                "Cash And Short Term Investments",
+                "Cash",
+            ],
+        )
+    if debt is None:
+        debt = _extract_statement_value(
+            balance_sheet,
+            ["Total Debt", "Long Term Debt And Capital Lease Obligation", "Total Liabilities Net Minority Interest"],
+        )
+
+    if all(value is None for value in [market_cap, revenue, operating_income, cash, debt]):
+        return None
+
+    net_cash = None
+    if cash is not None and debt is not None:
+        net_cash = cash - debt
+
+    overview_summary = " | ".join(
+        [
+            f"시가총액 {format_compact_financial_value(market_cap, market)}",
+            f"매출 {format_compact_financial_value(revenue, market)}",
+            f"영업이익 {format_compact_financial_value(operating_income, market)}",
+        ]
+    )
+    balance_summary = " | ".join(
+        [
+            f"현금 {format_compact_financial_value(cash, market)}",
+            f"부채 {format_compact_financial_value(debt, market)}",
+            (
+                f"순현금 {format_compact_financial_value(net_cash, market)}"
+                if net_cash is not None and net_cash >= 0
+                else f"순부채 {format_compact_financial_value(abs(net_cash), market)}"
+                if net_cash is not None
+                else "순현금(순부채) 확인 필요"
+            ),
+        ]
+    )
+
+    return {
+        "market_cap": market_cap,
+        "revenue": revenue,
+        "operating_income": operating_income,
+        "cash": cash,
+        "debt": debt,
+        "net_cash": net_cash,
+        "summary": f"{overview_summary} | {balance_summary}",
+        "overview_summary": overview_summary,
+        "balance_summary": balance_summary,
+    }
+
 def fetch_company_name_by_code(code):
     url = f"https://finance.naver.com/item/main.naver?code={code}"
     headers = {'User-Agent': 'Mozilla/5.0'}
@@ -485,12 +649,19 @@ def calculate_technical_indicators(ticker):
         print(f"[{ticker}] 지표 계산 실패: {e}")
         return None
 
-def generate_deep_analysis(name, reason, indicators, market="KR"):
+def generate_deep_analysis(name, reason, indicators, market="KR", financial_profile=None):
     """구조화된 3줄 요약 강제 적용"""
     if market == "US":
         currency_note = "모든 가격·밴드·기준선 수치는 미국 달러(USD) 기준이며, 본문에서 '원'·'₩' 표현을 쓰지 말고 달러($)로만 서술할 것."
     else:
         currency_note = "모든 가격·밴드·기준선 수치는 원화(KRW) 기준이며, 달러 표현을 쓰지 말 것."
+
+    finance_note = (
+        f"- 기업 재무 요약: {financial_profile['summary']}\n"
+        "- 가능하면 모멘텀/대응 전략 해설에서 위 재무 체력도 함께 짧게 반영할 것."
+        if financial_profile and financial_profile.get("summary")
+        else "- 기업 재무 요약: 확인 가능한 최신 재무 수치 부족"
+    )
 
     prompt = f"""
     월스트리트 수석 투자 분석가로서 '{name}' 종목에 대해 분석해.
@@ -500,6 +671,7 @@ def generate_deep_analysis(name, reason, indicators, market="KR"):
     - 시그널: {', '.join(indicators['signals']) if indicators['signals'] else '특이사항 없음'}
     - RSI: {indicators['rsi']:.2f} / 볼린저 상단: {indicators['bb_upper']:,.0f} / 볼린저 하단: {indicators['bb_lower']:,.0f}
     - 일목기준선: {indicators['kijun_sen']:,.0f} / 피보나치 50%: {indicators['fib_500']:,.0f}
+    {finance_note}
 
     [{currency_note}]
 
@@ -561,14 +733,31 @@ def main():
         if len(indicators['signals']) > 0:
             alert_triggered = True
             print(f"🚨 [{name}] 강력한 기술적 시그널 발생! 리포트 작성 중...")
-            
-            analysis = generate_deep_analysis(name, reason, indicators, market=market)
+
+            financial_profile = fetch_company_financial_profile(ticker, market)
+            analysis = generate_deep_analysis(
+                name,
+                reason,
+                indicators,
+                market=market,
+                financial_profile=financial_profile,
+            )
             analysis_formatted = analysis.replace('\n', '\n\n')
             
             signals_text = "\n\n".join([f"• {sig}" for sig in indicators['signals']])
             price_str = format_money(indicators['price'], market)
             kijun_str = format_money(indicators['kijun_sen'], market)
             bb_unit = "$" if market == "US" else "₩"
+            finance_overview = (
+                financial_profile["overview_summary"]
+                if financial_profile and financial_profile.get("overview_summary")
+                else "시가총액/매출/영업이익 확인 필요"
+            )
+            finance_balance = (
+                financial_profile["balance_summary"]
+                if financial_profile and financial_profile.get("balance_summary")
+                else "현금/부채/순현금(순부채) 확인 필요"
+            )
             
             teams_body_elements.extend([
                 {
@@ -584,6 +773,8 @@ def main():
                     "facts": [
                         {"title": "현재가", "value": price_str},
                         {"title": "주요 이슈", "value": reason},
+                        {"title": "기업 체급", "value": finance_overview},
+                        {"title": "재무 체력", "value": finance_balance},
                         {"title": "기술적 신호", "value": signals_text},
                         {"title": "볼린저 밴드", "value": f"하단 {bb_unit} {indicators['bb_lower']:,.0f} ~ 상단 {bb_unit} {indicators['bb_upper']:,.0f}"},
                         {"title": "RSI / 기준선", "value": f"{indicators['rsi']:.2f} / {kijun_str}"}
