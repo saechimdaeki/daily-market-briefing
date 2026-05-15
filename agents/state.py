@@ -51,7 +51,7 @@ GRAPH_STRUCTURE = [
     {"id": "analyze_market",        "label": "AI 시장 분석",         "icon": "🤖", "parallel": True},
     {"id": "fetch_and_curate_news", "label": "뉴스 수집 & 큐레이션", "icon": "📰", "parallel": True},
     {"id": "build_visual_brief",    "label": "이미지 방향 설계",     "icon": "🎨", "parallel": False},
-    {"id": "generate_image",        "label": "DALL-E 이미지 생성",   "icon": "🖼️", "parallel": False},
+    {"id": "generate_image",        "label": "GPT Image 생성",      "icon": "🖼️", "parallel": False},
     {"id": "render_html",           "label": "HTML 렌더링",          "icon": "📄", "parallel": False},
     {"id": "notify",                "label": "Teams 알림",           "icon": "🔔", "parallel": False, "conditional": True},
 ]

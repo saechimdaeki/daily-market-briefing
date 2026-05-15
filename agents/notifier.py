@@ -42,6 +42,7 @@ def notify(state: MarketBriefingState) -> dict:
     sp500 = state["sp500"]
     dow = state["dow"]
     nasdaq = state["nasdaq"]
+    card_image_url = state.get("image_url") or f"{GITHUB_PAGES_URL.rstrip('/')}/cover.png"
 
     teams_payload = {
         "type": "message",
@@ -54,7 +55,7 @@ def notify(state: MarketBriefingState) -> dict:
                 "body": [
                     {"type": "TextBlock", "text": f"🚨 {state['edition_title']}",
                      "weight": "Bolder", "size": "Medium", "color": "Accent"},
-                    {"type": "Image", "url": state.get("image_url", ""), "size": "Stretch"},
+                    {"type": "Image", "url": card_image_url, "size": "Stretch"},
                     {"type": "TextBlock", "text": f"🔥 {state.get('comic_headline', '')} 🔥",
                      "weight": "Bolder", "size": "Large", "wrap": True, "horizontalAlignment": "Center"},
                     {"type": "FactSet", "facts": [

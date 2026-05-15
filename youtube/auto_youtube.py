@@ -3,6 +3,7 @@ import time
 import requests
 import datetime
 import json
+import base64
 import yfinance as yf
 from openai import OpenAI
 from moviepy.editor import ImageClip, TextClip, CompositeVideoClip, AudioFileClip, concatenate_videoclips
@@ -15,6 +16,8 @@ if not OPENAI_API_KEY:
     raise ValueError("AI_API_KEY 환경변수가 설정되지 않았습니다.")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
+IMAGE_MODEL = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-2")
+IMAGE_QUALITY = os.environ.get("OPENAI_IMAGE_QUALITY", "medium")
 
 # 리치 고슴도치 캐릭터 정의
 RICH_HEDGEHOG = (
@@ -88,14 +91,29 @@ def generate_assets(data):
 # 🎨 5. 상황별 이미지 생성 및 🎬 6. 최종 렌더링
 # ==========================================
 def assemble_video(prompts, segments):
-    print(f"[4/6] DALL-E 3 이미지 10장 생성 중...")
+    print(f"[4/6] GPT Image 이미지 10장 생성 중...")
     img_paths = []
     for i, p in enumerate(prompts):
         try:
-            res = client.images.generate(model="dall-e-3", prompt=f"{RICH_HEDGEHOG} {p}", size="1024x1024")
+            res = client.images.generate(
+                model=IMAGE_MODEL,
+                prompt=f"{RICH_HEDGEHOG} {p}",
+                size="1024x1024",
+                quality=IMAGE_QUALITY,
+            )
+            image = res.data[0]
+            image_url = getattr(image, "url", None)
+            image_base64 = getattr(image, "b64_json", None)
+            if image_base64:
+                img_data = base64.b64decode(image_base64)
+            elif image_url:
+                img_data = requests.get(image_url, timeout=30).content
+            else:
+                raise RuntimeError("Image API response did not include url or b64_json")
+
             path = f"scene_{i}.png"
             with open(path, "wb") as f:
-                f.write(requests.get(res.data[0].url).content)
+                f.write(img_data)
             img_paths.append(path)
             time.sleep(1) # API 부하 방지
         except Exception as e:

@@ -107,7 +107,7 @@ def build_visual_brief(state: MarketBriefingState) -> dict:
     """
     [Node] 이미지 방향 설계 (LangChain LCEL 패턴)
     Chain: prompt | llm(temperature=0.9) | JsonOutputParser  →  4컷 패널 blueprint
-    이후 blueprint를 DALL-E 프롬프트 문자열로 포맷
+    이후 blueprint를 GPT Image 프롬프트 문자열로 포맷
     """
     t0 = time.time()
 
@@ -183,7 +183,7 @@ def build_visual_brief(state: MarketBriefingState) -> dict:
         print(f"비주얼 브리프 생성 실패: {e}")
         visual_brief = fallback_brief
 
-    # ── DALL-E 프롬프트 포맷 ──────────────────────────────────────────────────
+    # ── GPT Image 프롬프트 포맷 ───────────────────────────────────────────────
     mood_keywords = ", ".join(visual_brief.get("mood_keywords", fallback_brief["mood_keywords"]))
     must_show = ", ".join(visual_brief.get("must_show", fallback_brief["must_show"]))
     panels = visual_brief.get("panels", fallback_brief["panels"])

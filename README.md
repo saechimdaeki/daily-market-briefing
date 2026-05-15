@@ -15,7 +15,7 @@
 
 ### 2. 🌅 AI 데일리 마켓 브리핑
 * **팩트 폭격 AI 분석**: 주요 지수(KOSPI, S&P 500 등)의 실제 등락률 데이터를 프롬프트에 주입하여 정확한 시황 브리핑을 제공합니다.
-* **🎨 DALL-E 3 네컷 만화**: 매일의 증시 테마를 바탕으로 귀여운 황소와 곰돌이가 등장하는 웹툰을 자동 생성합니다.
+* **🎨 GPT Image 네컷 만화**: 매일의 증시 테마를 바탕으로 귀여운 황소와 곰돌이가 등장하는 웹툰을 자동 생성합니다.
 * **💻 프리미엄 핀테크 대시보드**: `Jinja2` 템플릿을 활용하여 깔끔한 정적 웹페이지(HTML)로 렌더링하고 **GitHub Pages**로 배포합니다.
 
 ---
@@ -46,7 +46,7 @@ GitHub Pages로 자동 배포되는 데일리 리포트 웹페이지
 |------|------|
 | **Language** | Python 3.10 |
 | **Agent Framework** | LangGraph (StateGraph), LangChain (LCEL) |
-| **AI Models** | OpenAI GPT-4o-mini (Text/JSON), DALL-E 3 (Image) |
+| **AI Models** | OpenAI GPT-4o-mini (Text/JSON), GPT Image (Image) |
 | **LLM Client** | langchain-openai (ChatOpenAI), openai SDK |
 | **Data & Scraping** | yfinance, pandas, BeautifulSoup4 |
 | **Template Engine** | Jinja2 |
@@ -82,10 +82,10 @@ START
   ▼
 [🎨 build_visual_brief]           ← LangChain LCEL (JsonOutputParser)
   4컷 패널 blueprint JSON 생성     catalyst, mood, shot 방향 설계
-  → DALL-E 최종 프롬프트 포맷
+  → GPT Image 최종 프롬프트 포맷
   │
   ▼
-[🖼️ generate_image]               ← DALL-E-3 API, cover.png 저장
+[🖼️ generate_image]               ← GPT Image API, cover.png 저장
   │
   ▼
 [📄 render_html]                  ← Jinja2, execution_log 오버레이 포함
@@ -180,7 +180,7 @@ daily-market-briefing/
 │   ├── market_data.py    # [Node] 시장 데이터 수집
 │   ├── news.py           # [Node] 뉴스 수집 & 큐레이션
 │   ├── analysis.py       # [Node] AI 시장 분석 + 이미지 방향 설계 (LangChain LCEL)
-│   ├── image_gen.py      # [Node] DALL-E-3 이미지 생성
+│   ├── image_gen.py      # [Node] GPT Image 이미지 생성
 │   ├── renderer.py       # [Node] Jinja2 HTML 렌더링
 │   └── notifier.py       # [Node] Teams Adaptive Card 전송
 ├── graph.py              # StateGraph 조립 (엣지 + 조건부 분기)

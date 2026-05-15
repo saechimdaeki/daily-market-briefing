@@ -11,7 +11,7 @@ LangGraph StateGraph 조립
     ↓ (fan-in: 두 노드 모두 완료 후)
   build_visual_brief                   LangChain LCEL: 4컷 이미지 방향 JSON
     ↓
-  generate_image                       DALL-E-3 생성 + cover.png 저장
+  generate_image                       GPT Image 생성 + cover.png 저장
     ↓
   render_html                          Jinja2 렌더링 + index.html 저장
     ↓ (conditional edge)
