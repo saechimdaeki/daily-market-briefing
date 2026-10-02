@@ -1,0 +1,39 @@
+name: AI Trading Desk
+
+on:
+  # 수동 실행 전용 (Actions 탭 또는 gh workflow run trading_desk.yml)
+  workflow_dispatch:
+
+permissions:
+  contents: write  # 학습용 desk_journal.json 커밋
+
+jobs:
+  desk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - run: pip install -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm install -g @anthropic-ai/claude-code
+
+      - name: 6개 AI 부서 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: python trading_desk.py
+
+      - name: 매매 저널 커밋 (다음 실행 복기용)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add desk_journal.json
+          git diff --cached --quiet || (git commit -m "chore: update trading desk journal" && git push)

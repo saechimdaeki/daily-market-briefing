@@ -1,0 +1,19 @@
+[
+ {
+  "date": "2026-10-02 09:12",
+  "regime": "하락장",
+  "strategy": "현금비중 확대+방어주",
+  "orders": [
+   {
+    "name": "ConocoPhillips",
+    "ticker": "COP",
+    "market": "US",
+    "entry": 120,
+    "target": 136,
+    "stop_loss": 112,
+    "weight_pct": 8.0,
+    "thesis": "20년 LNG 공급 계약으로 현금흐름 안정, RSI 과매도 신호와 Fibonacci 500 지지(121.81) 활용한 반등 기회, 배당성 우수한 방어주"
+   }
+  ]
+ }
+]
