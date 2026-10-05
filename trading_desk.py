@@ -33,6 +33,7 @@ from realtime_bot import (
     calculate_technical_indicators,
     extract_tickers_from_news,
     fetch_company_financial_profile,
+    fetch_company_name_by_code,
     format_money,
     get_finance_news_headlines,
     get_market_snapshot,
@@ -66,6 +67,9 @@ def screening(state: DeskState) -> dict:
     headlines = get_finance_news_headlines()
     stocks = align_stocks_to_news_context(headlines, extract_tickers_from_news(headlines))
     validated = validate_target_stocks(stocks)
+    for c in validated:  # 국내 상장은 네이버 공식 한글명으로 (Samsung Electronics → 삼성전자)
+        if c["market"] == "KR":
+            c["name"] = fetch_company_name_by_code(c["ticker"].split(".")[0]) or c["name"]
     half = MAX_CANDIDATES // 2
     kr = [c for c in validated if c["market"] == "KR"]
     us = [c for c in validated if c["market"] != "KR"]
@@ -266,6 +270,8 @@ def notify(state: DeskState) -> dict:
     regime, plan = state["regime"], state["plan"]
     techs, funds = state["technicals"], state["fundamentals"]
     head = lambda text: {"type": "TextBlock", "text": text, "weight": "Bolder", "size": "Medium", "separator": True, "spacing": "Medium"}
+    names = {c["ticker"]: f"{c['name']} ({c['ticker']})" for c in state["candidates"]}
+    label = lambda t: names.get(t, t)
     line = lambda text: {"type": "TextBlock", "text": text, "wrap": True, "spacing": "None"}
 
     body = [
@@ -273,13 +279,13 @@ def notify(state: DeskState) -> dict:
         head(f"01 스크리닝부 · 후보 {len(state['candidates'])}개 발굴"),
         *[line(f"• {c['name']} ({c['ticker']}): {c.get('reason', '')}") for c in state["candidates"]],
         head("02 기술적 분석부 · 추세·모멘텀"),
-        *[line(f"• {t}: RSI {v['rsi']:.1f} | {', '.join(v['signals']) or '특이 시그널 없음'}") for t, v in techs.items()],
+        *[line(f"• {label(t)}: RSI {v['rsi']:.1f} | {', '.join(v['signals']) or '특이 시그널 없음'}") for t, v in techs.items()],
         head("03 펀더멘털부 · 실적·재무"),
-        *[line(f"• {t}: {v}") for t, v in funds.items()],
+        *[line(f"• {label(t)}: {v}") for t, v in funds.items()],
         head(f"04 마켓부 · {regime['regime']} → {regime['strategy']}"),
         line(regime["rationale"]),
         head("05 리스크관리부 · 비중·손절 심사"),
-        *[line(f"{'✅' if r['verdict'] == '통과' else '🛑'} {r['ticker']}: "
+        *[line(f"{'✅' if r['verdict'] == '통과' else '🛑'} {label(r['ticker'])}: "
                + (f"비중 {r['weight_pct']:g}% · " if r["verdict"] == "통과" else "")
                + r.get("reason", "")) for r in state["risk_reviews"]],
         head(f"06 운용부 · 매매 계획 {len(plan['orders'])}건"),
