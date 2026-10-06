@@ -1,34 +1,18 @@
-import json
-import os
 import time
 
-from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-
+from agents.claude_cli import ask_claude, ask_claude_json
 from agents.state import MarketBriefingState
-
-
-def _make_llm(temperature: float = 0.7) -> ChatOpenAI:
-    return ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=temperature,
-        api_key=os.environ.get("AI_API_KEY"),
-    )
 
 
 def analyze_market(state: MarketBriefingState) -> dict:
     """
-    [Node] AI 시장 분석 (LangChain LCEL 패턴)
-    Chain 1: 시장 요약 3~5 포인트  (prompt | llm | StrOutputParser)
-    Chain 2: 헤드라인 생성         (prompt | llm | StrOutputParser)
+    [Node] AI 시장 분석 (Claude CLI)
+    1: 시장 요약 3~5 포인트
+    2: 헤드라인 생성
     """
     t0 = time.time()
     try:
-        llm = _make_llm(temperature=0.7)
-        str_parser = StrOutputParser()
-
-        # ── Chain 1: 시장 요약 ────────────────────────────────────────────────
+        # ── 1: 시장 요약 ──────────────────────────────────────────────────────
         kospi = state["kospi"]
         kosdaq = state["kosdaq"]
         sp500 = state["sp500"]
@@ -55,16 +39,14 @@ def analyze_market(state: MarketBriefingState) -> dict:
 3. 데이터 간의 온도 차이가 있다면, 오늘 투자자들이 어떤 포지션을 취해야 하는지 대응 전략을 제시할 것.
 4. 각 포인트는 글머리 기호 없이 한 줄씩 작성하고, 강조할 핵심 단어 양쪽에만 별표(**)를 붙일 것.
 """
-        summary_prompt = ChatPromptTemplate.from_messages([("user", "{input}")])
-        summary_chain = summary_prompt | llm | str_parser
-        llm_summary_raw = summary_chain.invoke({"input": text_prompt_str})
+        llm_summary_raw = ask_claude(text_prompt_str)
         summary_items = [
             item.strip().lstrip("-").lstrip("*").strip()
             for item in llm_summary_raw.split("\n")
             if item.strip()
         ]
 
-        # ── Chain 2: 헤드라인 ─────────────────────────────────────────────────
+        # ── 2: 헤드라인 ───────────────────────────────────────────────────────
         headline_prompt_str = f"""
 다음 요약 내용을 바탕으로, 시장의 충돌감과 아이러니가 느껴지는 아주 짧고 강렬한 한 줄 헤드라인을 만들어줘.
 
@@ -77,9 +59,7 @@ def analyze_market(state: MarketBriefingState) -> dict:
 내용:
 {llm_summary_raw}
 """
-        headline_prompt = ChatPromptTemplate.from_messages([("user", "{input}")])
-        headline_chain = headline_prompt | llm | str_parser
-        comic_headline = headline_chain.invoke({"input": headline_prompt_str}).strip()
+        comic_headline = ask_claude(headline_prompt_str).strip()
 
         duration_ms = int((time.time() - t0) * 1000)
         return {
@@ -105,8 +85,7 @@ def analyze_market(state: MarketBriefingState) -> dict:
 
 def build_visual_brief(state: MarketBriefingState) -> dict:
     """
-    [Node] 이미지 방향 설계 (LangChain LCEL 패턴)
-    Chain: prompt | llm(temperature=0.9) | JsonOutputParser  →  4컷 패널 blueprint
+    [Node] 이미지 방향 설계 (Claude CLI, JSON 출력)  →  4컷 패널 blueprint
     이후 blueprint를 GPT Image 프롬프트 문자열로 포맷
     """
     t0 = time.time()
@@ -135,7 +114,6 @@ def build_visual_brief(state: MarketBriefingState) -> dict:
     }
 
     try:
-        llm = _make_llm(temperature=0.9)
         prompt_context = (
             "간밤의 미국 시장 주요 이슈와 오늘 아침 한국 시장의 개장 흐름 및 관전 포인트"
             if state["is_morning"]
@@ -172,9 +150,7 @@ def build_visual_brief(state: MarketBriefingState) -> dict:
   ]
 }}
 """
-        brief_prompt = ChatPromptTemplate.from_messages([("user", "{input}")])
-        brief_chain = brief_prompt | llm | JsonOutputParser()
-        visual_brief = brief_chain.invoke({"input": visual_brief_prompt_str})
+        visual_brief = ask_claude_json(visual_brief_prompt_str)
 
         if len(visual_brief.get("panels", [])) != 4:
             raise ValueError(f"패널 수 오류: {len(visual_brief.get('panels', []))}")

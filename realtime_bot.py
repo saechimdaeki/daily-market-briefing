@@ -4,7 +4,6 @@ import re
 import requests
 from bs4 import BeautifulSoup
 import yfinance as yf
-from openai import OpenAI
 import pandas as pd
 
 try:
@@ -13,50 +12,11 @@ try:
 except ImportError:
     pass
 
+from agents.claude_cli import ask_claude, ask_claude_json
+
 # 환경 변수 세팅
-OPENAI_API_KEY = os.environ.get("AI_API_KEY") 
 TEAMS_WEBHOOK_URL = os.environ.get("TEAMS_WEBHOOK_URL")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
-
-
-def _strip_llm_json_fence(text):
-    t = (text or "").strip()
-    if t.startswith("```json"):
-        t = t[7:]
-    elif t.startswith("```"):
-        t = t[3:]
-    if t.endswith("```"):
-        t = t[:-3]
-    return t.strip()
-
-
-def _parse_model_json_loose(text):
-    """
-    모델 출력을 dict 또는 list로 파싱. json_object 모드가 실패하거나
-    레거시 배열만 온 경우 보조 처리.
-    """
-    raw = _strip_llm_json_fence(text)
-    try:
-        data = json.loads(raw)
-        return data
-    except json.JSONDecodeError:
-        pass
-    start = raw.find("{")
-    end = raw.rfind("}")
-    if start != -1 and end > start:
-        try:
-            return json.loads(raw[start : end + 1])
-        except json.JSONDecodeError:
-            pass
-    start = raw.find("[")
-    end = raw.rfind("]")
-    if start != -1 and end > start:
-        try:
-            return json.loads(raw[start : end + 1])
-        except json.JSONDecodeError:
-            pass
-    raise ValueError("모델 응답을 JSON으로 파싱할 수 없음")
 
 
 def normalize_company_name(name):
@@ -277,21 +237,12 @@ def fetch_company_financial_profile(ticker, market):
     }
 
 def fetch_company_name_by_code(code):
-    url = f"https://finance.naver.com/item/main.naver?code={code}"
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    # 네이버 금융 PC 페이지가 stock.naver.com CSR로 이전 → 모바일 API 사용
     try:
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
-        response.encoding = 'euc-kr'
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        title_text = soup.title.text.strip() if soup.title and soup.title.text else ""
-        if title_text:
-            return title_text.split(":")[0].strip()
-
-        company_anchor = soup.select_one(".wrap_company h2 a")
-        if company_anchor:
-            return company_anchor.get_text(strip=True)
+        r = requests.get(f"https://m.stock.naver.com/api/stock/{code}/basic",
+                         headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+        r.raise_for_status()
+        return r.json().get("stockName")
     except Exception as e:
         print(f"[{code}] 종목명 조회 실패: {e}")
     return None
@@ -309,44 +260,19 @@ def resolve_market_suffix(code):
 def search_korean_stock_by_name(name):
     if not name:
         return None
-
-    url = "https://finance.naver.com/search/searchList.naver"
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    normalized_target = normalize_company_name(name)
-
     try:
-        response = requests.get(url, params={"query": name}, headers=headers, timeout=10)
-        response.raise_for_status()
-        response.encoding = 'euc-kr'
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        candidates = []
-        for anchor in soup.select('a[href*="/item/main.naver?code="]'):
-            href = anchor.get("href", "")
-            match = re.search(r"code=(\d{6})", href)
-            candidate_name = anchor.get_text(strip=True)
-            if not match or not candidate_name:
-                continue
-            candidates.append({
-                "name": candidate_name,
-                "code": match.group(1),
-            })
-
-        if not candidates:
+        r = requests.get("https://m.stock.naver.com/front-api/search/autoComplete",
+                         params={"query": name, "target": "stock"},
+                         headers={'User-Agent': 'Mozilla/5.0'}, timeout=10)
+        r.raise_for_status()
+        items = [i for i in r.json().get("result", {}).get("items", [])
+                 if i.get("nationCode") == "KOR" and i.get("typeCode") in ("KOSPI", "KOSDAQ")]
+        if not items:
             return None
-
-        exact_candidate = next(
-            (candidate for candidate in candidates if normalize_company_name(candidate["name"]) == normalized_target),
-            candidates[0],
-        )
-        suffix = resolve_market_suffix(exact_candidate["code"])
-        if not suffix:
-            return None
-
-        return {
-            "name": exact_candidate["name"],
-            "ticker": f'{exact_candidate["code"]}.{suffix}',
-        }
+        target = normalize_company_name(name)
+        hit = next((i for i in items if normalize_company_name(i["name"]) == target), items[0])
+        suffix = "KS" if hit["typeCode"] == "KOSPI" else "KQ"
+        return {"name": hit["name"], "ticker": f'{hit["code"]}.{suffix}'}
     except Exception as e:
         print(f"[{name}] 종목 검색 실패: {e}")
         return None
@@ -403,30 +329,26 @@ def validate_target_stocks(target_stocks):
     return validated
 
 def get_finance_news_headlines():
-    """네이버 금융 '주요 뉴스'를 크롤링하여 핵심 기사 추출"""
-    url = "https://finance.naver.com/news/mainnews.naver"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    """Google News RSS에서 최근 1일 증시 헤드라인 수집
+    (네이버 금융 mainnews는 stock.naver.com CSR 페이지로 이전되어 스크래핑 불가)"""
+    import xml.etree.ElementTree as ET
     headlines = []
-    
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        
-        response.encoding = 'euc-kr' 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        for a_tag in soup.select('.articleSubject a'):
-            title = a_tag.text.strip()
-            if title and title not in headlines:
-                headlines.append(title)
-                
-            if len(headlines) >= 45:
-                break
-                
-        return headlines
-    except Exception as e:
-        print(f"뉴스 수집 실패: {e}")
-        return []
+    for q in ("특징주", "증시", "코스피", "뉴욕증시"):
+        try:
+            r = requests.get(
+                "https://news.google.com/rss/search",
+                params={"q": f"{q} when:1d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"},
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=10,
+            )
+            r.raise_for_status()
+            for item in ET.fromstring(r.content).iter("item"):
+                title = re.sub(r"\s+-\s+[^-]+$", "", item.findtext("title") or "").strip()  # 언론사명 제거
+                if title and title not in headlines:
+                    headlines.append(title)
+        except Exception as e:
+            print(f"뉴스 수집 실패({q}): {e}")
+    return headlines[:45]
 
 def extract_tickers_from_news(headlines):
     """뉴스 헤드라인에서 타겟 종목 추출 (강제성 부여)"""
@@ -466,14 +388,7 @@ def extract_tickers_from_news(headlines):
     {{"stocks": [{{"name": "정확한 상장기업명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄 요약"}}, ...]}}
     """
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            response_format={"type": "json_object"},
-        )
-        res_text = response.choices[0].message.content or ""
-        data = _parse_model_json_loose(res_text)
+        data = ask_claude_json(prompt)
         if isinstance(data, dict):
             stocks = data.get("stocks")
             if isinstance(stocks, list):
@@ -522,14 +437,7 @@ def align_stocks_to_news_context(headlines, stocks):
 길이는 입력과 동일하고 index는 0부터 N-1까지 정확히 한 번씩.
 형식: {{"alignments": [{{"index": 0, "exclude": false, "name": "...", "ticker": "...", "reason": "한 줄"}}, ...]}}"""
 
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            response_format={"type": "json_object"},
-        )
-        res_text = response.choices[0].message.content or ""
-        data = _parse_model_json_loose(res_text)
+        data = ask_claude_json(prompt)
         if isinstance(data, dict):
             parsed = data.get("alignments")
         elif isinstance(data, list):
@@ -682,42 +590,125 @@ def generate_deep_analysis(name, reason, indicators, market="KR", financial_prof
     • 3줄 (대응 전략): 단기 대응 가이드
     """
     try:
-        res = client.chat.completions.create(
-            model="gpt-4o-mini", 
-            messages=[{"role": "user", "content": prompt}], 
-            temperature=0.3
-        )
-        return res.choices[0].message.content.strip()
+        return ask_claude(prompt)
     except Exception:
         return "• 분석을 불러오는 중 오류가 발생했습니다."
+
+MARKET_INDICATORS = {
+    "코스피": "^KS11",
+    "코스닥": "^KQ11",
+    "S&P500": "^GSPC",
+    "나스닥": "^IXIC",
+    "달러/원": "KRW=X",
+    "VIX": "^VIX",
+    "미 10년물": "^TNX",
+    "WTI": "CL=F",
+}
+
+
+def get_market_snapshot():
+    """주요 지수의 현재값·전일대비·5일 추세"""
+    snapshot = {}
+    for label, symbol in MARKET_INDICATORS.items():
+        try:
+            close = yf.Ticker(symbol).history(period="1mo")["Close"].dropna()
+            if len(close) < 6:
+                continue
+            snapshot[label] = {
+                "last": float(close.iloc[-1]),
+                "chg_1d": float((close.iloc[-1] / close.iloc[-2] - 1) * 100),
+                "chg_5d": float((close.iloc[-1] / close.iloc[-6] - 1) * 100),
+                "above_ma20": bool(close.iloc[-1] > close.tail(20).mean()),
+            }
+        except Exception as e:
+            print(f"[{symbol}] 지수 조회 실패: {e}")
+    return snapshot
+
+
+def generate_market_momentum(headlines, snapshot):
+    """지수 흐름 + 헤드라인으로 현재 시장 모멘텀 AI 해석"""
+    if not snapshot:
+        return None
+    lines = "\n".join(
+        f"- {k}: {v['last']:,.2f} (1일 {v['chg_1d']:+.2f}%, 5일 {v['chg_5d']:+.2f}%, 20일선 {'위' if v['above_ma20'] else '아래'})"
+        for k, v in snapshot.items()
+    )
+    prompt = f"""너는 한국 증권사 시황 애널리스트다. 아래 데이터로 **지금 시장 모멘텀**을 해석해.
+
+[주요 지표]
+{lines}
+
+[최신 증시 헤드라인]
+{json.dumps(headlines[:25], ensure_ascii=False)}
+
+[작성 규칙] 반드시 아래 4줄, 각 줄 앞에 '• ' 붙이고 한 줄씩 간결하게. 수치 근거를 포함할 것.
+• 시장 온도: 위험선호/회피 중 어디인지 한 단어 판정(예: 🔥강세 / 🌤️중립 / 🧊약세)과 근거
+• 모멘텀 동력: 지금 시장을 움직이는 핵심 테마·수급·매크로(환율·금리·유가)
+• 리스크 요인: 추세를 꺾을 수 있는 변수
+• 오늘의 대응: 섹터/포지션 관점 단기 전략 (특정 매수·매도 지시 금지)"""
+    try:
+        return ask_claude(prompt)
+    except Exception as e:
+        print(f"시장 모멘텀 분석 실패: {e}")
+        return None
+
+
+def build_market_elements(snapshot, momentum):
+    elements = []
+    if snapshot:
+        elements.append({
+            "type": "FactSet",
+            "facts": [
+                {
+                    "title": k,
+                    "value": f"{v['last']:,.2f}  ({'🔺' if v['chg_1d'] >= 0 else '🔻'}{v['chg_1d']:+.2f}% / 5일 {v['chg_5d']:+.2f}%)",
+                }
+                for k, v in snapshot.items()
+            ],
+        })
+    if momentum:
+        elements.extend([
+            {"type": "TextBlock", "text": "🧭 AI 시장 모멘텀 해석", "weight": "Bolder", "size": "Medium", "spacing": "Medium"},
+            {"type": "TextBlock", "text": momentum.replace("\n", "\n\n"), "wrap": True, "spacing": "Small"},
+        ])
+    if elements:
+        elements.append({"type": "TextBlock", "text": " ", "wrap": True, "separator": True})
+    return elements
+
 
 def main():
     print("실시간 시장 감시 시작...")
     headlines = get_finance_news_headlines()
-    
-    if not headlines: 
+
+    if not headlines:
         print("뉴스를 가져오지 못했습니다.")
         return
-        
+
+    print("시장 지표 수집 및 AI 모멘텀 해석 중...")
+    snapshot = get_market_snapshot()
+    momentum = generate_market_momentum(headlines, snapshot)
+
     print("AI 타겟 종목 추출 중...")
     target_stocks = extract_tickers_from_news(headlines)
     print("AI 뉴스 맥락 정렬 중...")
     target_stocks = align_stocks_to_news_context(headlines, target_stocks)
     target_stocks = validate_target_stocks(target_stocks)
     print(f"-> 타겟 종목 수 (맥락 정렬·검증 후): {len(target_stocks)}개")
-    
+
     # 여러 종목을 한 번에 모아서 보낼 리스트 준비
     teams_body_elements = [
         {
             "type": "TextBlock",
-            "text": "⚡ 실시간 특징주 모니터링",
+            "text": "⚡ 실시간 시장 모멘텀 & 특징주",
             "weight": "Bolder",
             "size": "Large",
             "color": "Accent"
-        }
+        },
+        *build_market_elements(snapshot, momentum),
     ]
-    
-    alert_triggered = False
+
+    # ponytail: 모멘텀 해석만 있어도 전송 (종목 시그널 없어도 시황은 받음)
+    alert_triggered = bool(momentum)
     
     for stock in target_stocks:
         ticker = stock.get('ticker')
@@ -811,8 +802,8 @@ def main():
             ]
         }
         try:
-            requests.post(TEAMS_WEBHOOK_URL, json=payload)
-            print("Teams 통합 알림 전송 완료!")
+            r = requests.post(TEAMS_WEBHOOK_URL, json=payload, timeout=30)
+            print(f"Teams 통합 알림 전송 완료! (HTTP {r.status_code})")
         except Exception as e:
             print(f"알림 전송 실패: {e}")
     else:

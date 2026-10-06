@@ -8,6 +8,8 @@ import pytz
 import requests
 from bs4 import BeautifulSoup
 
+from agents.claude_cli import ask_claude_json
+
 
 NAVER_FINANCE_HOME_URL = "https://finance.naver.com/"
 NAVER_MAIN_NEWS_URL = "https://finance.naver.com/news/mainnews.naver"
@@ -228,22 +230,8 @@ def _dedupe_articles(articles):
     return deduped
 
 
-def _parse_json_loose(text):
-    raw = _clean_text(text)
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        start = raw.find("{")
-        end = raw.rfind("}")
-        if start != -1 and end > start:
-            return json.loads(raw[start : end + 1])
-        raise
-
-
-def select_major_market_news(client, candidates, market_snapshot, is_morning, max_items=4):
-    if not client or not candidates:
+def select_major_market_news(candidates, market_snapshot, is_morning, max_items=4):
+    if not candidates:
         return []
 
     compact_candidates = []
@@ -292,13 +280,7 @@ def select_major_market_news(client, candidates, market_snapshot, is_morning, ma
 }}
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.2,
-        response_format={"type": "json_object"},
-    )
-    parsed = _parse_json_loose(response.choices[0].message.content or "")
+    parsed = ask_claude_json(prompt)
     selected = parsed.get("selected_news") if isinstance(parsed, dict) else None
     if not isinstance(selected, list):
         return []
@@ -342,7 +324,7 @@ def load_existing_daily_news_digest():
     return None
 
 
-def build_daily_news_digest(client, market_snapshot, is_morning, max_items=4):
+def build_daily_news_digest(market_snapshot, is_morning, max_items=4):
     if not is_morning:
         existing = load_existing_daily_news_digest()
         if existing:
@@ -358,7 +340,6 @@ def build_daily_news_digest(client, market_snapshot, is_morning, max_items=4):
         raw_articles = fetch_naver_finance_main_news(limit=18)
     enriched = _dedupe_articles([enrich_article_metadata(article) for article in raw_articles])
     selected = select_major_market_news(
-        client=client,
         candidates=enriched,
         market_snapshot=market_snapshot,
         is_morning=is_morning,

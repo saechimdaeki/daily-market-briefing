@@ -1,8 +1,6 @@
 import os
 import time
 
-from openai import OpenAI
-
 from daily_news_digest import build_daily_news_digest, save_daily_news_digest
 from agents.state import MarketBriefingState
 
@@ -17,9 +15,7 @@ def fetch_and_curate_news(state: MarketBriefingState) -> dict:
     """
     t0 = time.time()
     try:
-        client = OpenAI(api_key=os.environ.get("AI_API_KEY"))
         digest = build_daily_news_digest(
-            client=client,
             market_snapshot=state["market_snapshot"],
             is_morning=state["is_morning"],
             max_items=4,

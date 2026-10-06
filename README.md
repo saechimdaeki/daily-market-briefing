@@ -206,12 +206,22 @@ daily-market-briefing/
 
 ## ⏰ Automation Schedule
 
-GitHub Actions의 Cron 스케줄러를 활용해 서버 없이 **평일(월~금)**에만 100% 자동으로 작동합니다. (KST 기준)
+데일리 브리핑은 Codex cron automation이 이 workspace를 주기적으로 열어 직접 실행합니다.  
+기존 GitHub Actions workflow는 장애 대응 또는 비교 실행을 위한 `workflow_dispatch` 수동 백업으로만 유지합니다. (KST 기준)
 
-* **⚡ 실시간 감시 (장중)**: 09:00 ~ 15:00 (매 1시간 간격 실행)
-* **🌅 Morning Briefing**: 07:30 (미장 마감 요약 및 국장 프리뷰)
-* **🌇 Evening Briefing**: 18:30 (국장 마감 요약 및 미장 프리뷰)
+* **🌅 Morning Briefing**: 평일 09:20 (미장 마감 요약 및 국장 프리뷰)
+* **🌇 Evening Briefing**: 평일 16:00 (국장 마감 요약 및 미장 프리뷰)
+* **⚡ 실시간 감시 (장중)**: 기존 GitHub Actions `realtime.yml` 유지
 * **⌨️ Teams 온디맨드 조회**: 필요할 때마다 `Teams Stock Command` 워크플로우를 `workflow_dispatch`로 호출
+
+### Codex runbook
+
+Codex automation은 아래 작업을 순서대로 수행합니다.
+
+1. `.env`의 `AI_API_KEY`, `TEAMS_WEBHOOK_URL`을 로드한다.
+2. `python main.py`를 실행해 시장 데이터 수집, GPT 분석, GPT Image 생성, HTML 렌더링, Teams 알림을 수행한다.
+3. `public/index.html`, `public/cover.png`, `public/daily_news_digest.json` 변경 결과를 확인한다.
+4. 필요하면 기존 GitHub Pages 배포 방식과 동일하게 `public/` 결과물을 `gh-pages`에 반영한다.
 
 ---
 
