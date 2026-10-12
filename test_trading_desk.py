@@ -1,6 +1,8 @@
 """리스크관리부 하드 룰 검증: python test_trading_desk.py"""
 import trading_desk as td
 
+td._load_journal = lambda: []
+
 state = {
     "candidates": [{"name": n, "ticker": t, "market": "KR"} for n, t in [("A", "A"), ("B", "B"), ("C", "C"), ("D", "D")]],
     "technicals": {t: {"price": 100.0} for t in "ABCD"},
@@ -18,7 +20,7 @@ assert r["A"]["weight_pct"] == 20 and r["B"]["weight_pct"] == 10, r
 assert r["C"]["verdict"] == "보류" and r["D"]["verdict"] == "보류", r
 
 # 스크리닝 한·미 균형: KR 2개뿐이면 US로 채움
-c = lambda m, i: {"name": f"{m}{i}", "ticker": f"{m}{i}", "market": m}
+c = lambda m, i: {"name": f"테스트{m}{i}", "ticker": f"{m}{i}", "market": m, "reason": "테스트 뉴스"}
 td.get_finance_news_headlines = lambda: ["테스트 뉴스"]
 td.fetch_company_name_by_code = lambda _: None
 td.extract_tickers_from_news = td.align_stocks_to_news_context = lambda *a: []

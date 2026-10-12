@@ -406,6 +406,7 @@ def extract_tickers_from_news(headlines):
     뉴스: {headlines}
 
     응답은 **유효한 JSON 객체 하나만** 출력한다 (마크다운·설명·백틱 금지).
+    name과 reason은 반드시 한국어로 작성한다. 티커만 원래 기호를 유지한다.
     reason 문자열 안에 큰따옴표(")를 넣지 말 것 (깨짐 방지).
     형식:
     {{"stocks": [{{"name": "정확한 상장기업명", "ticker": "티커", "reason": "관련 뉴스 핵심 1줄 요약"}}, ...]}}
@@ -456,6 +457,7 @@ def align_stocks_to_news_context(headlines, stocks):
 3) 한국: 반드시 ######.KS 또는 ######.KQ. 미국: 야후 표준 티커(예: BRK-B).
 4) **명백히 뉴스와 무관**하거나 종목 지정이 틀렸다고 확신하면 exclude: true. 애매하면 exclude: false로 두고 ticker는 유지해도 된다.
 
+name과 reason은 반드시 한국어로 작성한다.
 출력: 유효한 JSON 객체 하나만 (코드펜스·설명 금지). reason 안에 큰따옴표(") 금지.
 길이는 입력과 동일하고 index는 0부터 N-1까지 정확히 한 번씩.
 형식: {{"alignments": [{{"index": 0, "exclude": false, "name": "...", "ticker": "...", "reason": "한 줄"}}, ...]}}"""

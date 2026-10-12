@@ -18,6 +18,7 @@ AI 트레이딩 데스크 — 6개 AI 부서 LangGraph 파이프라인
 
 import json
 import os
+import re
 import time
 from datetime import datetime
 
@@ -46,6 +47,46 @@ MAX_CANDIDATES = 8          # ponytail: 후보 상한 — yfinance/LLM 호출 �
 MAX_WEIGHT_PCT = 20         # 종목당 최대 비중 (리스크관리부 하드 캡)
 REGIME_TOTAL_CAP = {"상승장": 80, "횡보장": 50, "하락장": 30}  # 장세별 총 투자 비중 상한
 
+KOREAN_NAMES = {
+    "005930.KS": "삼성전자", "000660.KS": "SK하이닉스", "006400.KS": "삼성SDI",
+    "003670.KS": "포스코퓨처엠", "207940.KS": "삼성바이오로직스",
+    "COP": "코노코필립스", "MU": "마이크론", "TSM": "대만반도체제조",
+    "ASML": "에이에스엠엘", "NVDA": "엔비디아", "AVGO": "브로드컴",
+    "AAPL": "애플", "MSFT": "마이크로소프트", "AMZN": "아마존",
+    "GOOGL": "알파벳", "META": "메타", "TSLA": "테슬라", "INTC": "인텔",
+    "PEP": "펩시코", "XOM": "엑슨모빌", "JPM": "제이피모건", "PG": "프록터앤드갬블",
+}
+
+
+def _has_korean(text):
+    return bool(re.search(r"[가-힣]", str(text or "")))
+
+
+def _display_name(order):
+    ticker = order["ticker"]
+    name = KOREAN_NAMES.get(ticker, order.get("name", ""))
+    return name if _has_korean(name) else "국내 종목" if ticker.endswith((".KS", ".KQ")) else "미국 종목"
+
+
+def _localize_candidates(candidates):
+    for c in candidates:
+        c["name"] = KOREAN_NAMES.get(c["ticker"], c["name"])
+    pending = [c for c in candidates if not _has_korean(c["name"]) or not _has_korean(c.get("reason"))]
+    if pending:
+        translated = ask_claude_json(
+            "다음 종목의 name을 통용되는 한국어 기업명으로, reason을 한국어 뉴스 요약으로 번역하라. "
+            "티커와 사실은 변경하지 말고 모든 설명은 한국어로 쓴다. "
+            'JSON 형식: {"stocks": [{"ticker": "...", "name": "...", "reason": "..."}]}\n'
+            + json.dumps(pending, ensure_ascii=False)
+        )
+        by_ticker = {c["ticker"]: c for c in translated.get("stocks", [])}
+        for c in pending:
+            t = by_ticker.get(c["ticker"], {})
+            if not (_has_korean(t.get("name")) and _has_korean(t.get("reason"))):
+                raise RuntimeError("한국어 뉴스 요약 실패: Teams 전송 중단")
+            c.update(name=KOREAN_NAMES.get(c["ticker"], t["name"]), reason=t["reason"])
+    return candidates
+
 
 class DeskState(TypedDict, total=False):
     headlines: list
@@ -55,6 +96,7 @@ class DeskState(TypedDict, total=False):
     regime: dict           # {regime, strategy, rationale, snapshot_text}
     risk_reviews: list     # [{ticker, verdict, weight_pct, stop_loss, reason}]
     plan: dict             # 운용부 최종 계획
+    journal: list
     review_text: str       # 지난 계획 복기
 
 
@@ -77,7 +119,7 @@ def screening(state: DeskState) -> dict:
     us = [c for c in validated if c["market"] != "KR"]
     # 한·미 절반씩, 한쪽이 모자라면 다른 쪽으로 채움
     n_kr = min(len(kr), max(half, MAX_CANDIDATES - len(us)))
-    candidates = kr[:n_kr] + us[:MAX_CANDIDATES - n_kr]
+    candidates = _localize_candidates(kr[:n_kr] + us[:MAX_CANDIDATES - n_kr])
     print(f"[스크리닝부] 후보 {len(candidates)}개: {[c['name'] for c in candidates]}")
     return {"headlines": headlines, "candidates": candidates}
 
@@ -110,7 +152,7 @@ def market(state: DeskState) -> dict:
         f"- {k}: {v['last']:,.2f} (1일 {v['chg_1d']:+.2f}%, 5일 {v['chg_5d']:+.2f}%, 20일선 {'위' if v['above_ma20'] else '아래'})"
         for k, v in snap.items()
     )
-    prompt = f"""너는 증권사 마켓부장이다. 아래 지표와 헤드라인으로 현재 장세를 판정하고 전략을 고른다.
+    prompt = f"""모든 설명과 전략명은 한국어로 쓴다. 너는 증권사 마켓부장이다. 아래 지표와 헤드라인으로 현재 장세를 판정하고 전략을 고른다.
 
 [지표]
 {snapshot_text}
@@ -144,11 +186,14 @@ def _candidate_dossier(state: DeskState) -> list:
 
 # ── 05 리스크관리부 ────────────────────────────────────────────────────────────
 def risk(state: DeskState) -> dict:
+    journal = _load_journal()
+    _refresh_journal(journal)
+    previous = _latest_plans(journal)
     dossier = _candidate_dossier(state)
     regime = state["regime"]
     total_cap = REGIME_TOTAL_CAP[regime["regime"]]
     if not dossier:
-        return {"risk_reviews": []}
+        return {"risk_reviews": [], "journal": journal}
 
     prompt = f"""너는 리스크관리부장이다. 공격적 아이디어에 반대하고 자본을 지키는 것이 임무다.
 장세: {regime['regime']} / 전략: {regime['strategy']}
@@ -156,6 +201,10 @@ def risk(state: DeskState) -> dict:
 
 [후보 종목 자료]
 {json.dumps(dossier, ensure_ascii=False)}
+
+[종목별 최신 계획과 평가]
+{json.dumps(previous, ensure_ascii=False)}
+설명과 근거는 반드시 한국어로 작성한다.
 
 각 종목에 대해:
 - verdict: "통과" 또는 "보류" (RSI 과열, 밴드 상단 과이탈, 재무 취약, 뉴스 근거 빈약, 장세 불일치면 보류)
@@ -174,6 +223,23 @@ JSON 형식: {{"reviews": [{{"ticker": "...", "verdict": "...", "weight_pct": 0,
     total = 0
     for r in reviews:
         price = prices.get(r.get("ticker"))
+        prior = previous.get(r.get("ticker"))
+        if prior:
+            old = prior["order"]
+            status = old.get("review_status")
+            reason = None
+            if status == "진행중":
+                reason = "기존 계획 진행 중: 중복 신규 추천 제외"
+            elif status is None:
+                reason = "기존 계획 평가 미확인: 신규 추천 보류"
+            elif status == "손절" and (price is None or price <= old["stop_loss"]):
+                reason = "최근 손절가 회복 전: 재진입 보류"
+            if reason:
+                r.update(verdict="보류", weight_pct=0, stop_loss=None, reason=reason)
+                continue
+            r["plan_type"] = "재진입 계획"
+            r["previous_result"] = status
+
         stop = r.get("stop_loss")
         bad_stop = not isinstance(stop, (int, float)) or price is None or stop >= price
         if r.get("verdict") != "통과" or bad_stop:
@@ -187,7 +253,7 @@ JSON 형식: {{"reviews": [{{"ticker": "...", "verdict": "...", "weight_pct": 0,
             r.update(verdict="보류", stop_loss=None, reason="총 비중 상한 초과")
         total += r["weight_pct"]
     print(f"[리스크관리부] 통과 {sum(r['verdict'] == '통과' for r in reviews)}/{len(reviews)}, 총 비중 {total}%")
-    return {"risk_reviews": reviews}
+    return {"risk_reviews": reviews, "journal": journal}
 
 
 # ── 학습: 지난 계획 복기 ───────────────────────────────────────────────────────
@@ -199,26 +265,67 @@ def _load_journal() -> list:
         return []
 
 
-def _review_past_plans(journal: list) -> str:
-    """최근 5회 계획의 진입가 대비 현재 수익률 — 운용부가 다음 계획에 반영."""
-    lines = []
+def _latest_plans(journal, exclude_today=False):
+    latest = {}
     today = datetime.now(KST).strftime("%Y-%m-%d")
-    past = [e for e in journal if not e["date"].startswith(today)]  # 당일 계획은 성과가 없으니 제외
-    for entry in past[-5:]:
-        for p in entry.get("orders", []):
-            try:
-                now = float(yf.Ticker(p["ticker"]).history(period="5d")["Close"].dropna().iloc[-1])
-                ret = (now / p["entry"] - 1) * 100
-                hit = "손절" if now <= p["stop_loss"] else ("목표 도달" if now >= p["target"] else "진행중")
-                lines.append(f"- {entry['date']} {p['name']}({p['ticker']}) {entry['regime']}/{entry['strategy']}: {ret:+.2f}% [{hit}]")
-            except Exception:
+    for entry in sorted(journal, key=lambda e: e["date"]):
+        if exclude_today and entry["date"].startswith(today):
+            continue
+        for order in entry.get("orders", []):
+            latest[order["ticker"]] = {"date": entry["date"], "regime": entry["regime"],
+                                       "strategy": entry["strategy"], "order": order}
+    return latest
+
+
+def _refresh_journal(journal):
+    """최신 계획의 일별 종가로 평가하며 종료 결과를 고정한다."""
+    records = list(_latest_plans(journal, exclude_today=True).values()) + list(_latest_plans(journal).values())
+    seen = set()
+    for record in records:
+        p = record["order"]
+        if id(p) in seen:
+            continue
+        seen.add(id(p))
+        if p.get("review_status") in ("손절", "목표 도달"):
+            continue
+        try:
+            history = yf.Ticker(p["ticker"]).history(start=record["date"][:10], auto_adjust=False)
+            closes = history["Close"].dropna()
+            if closes.empty:
                 continue
+            # 진입일 이후 처음 기준에 도달한 관측 종가를 기록한다.
+            hits = closes[(closes <= p["stop_loss"]) | (closes >= p["target"])]
+            if not hits.empty:
+                date, price = hits.index[0], float(hits.iloc[0])
+                p.update(review_status="손절" if price <= p["stop_loss"] else "목표 도달",
+                         review_price=price, review_date=str(date)[:10])
+            else:
+                p.update(review_status="진행중", review_price=float(closes.iloc[-1]),
+                         review_date=str(closes.index[-1])[:10])
+        except Exception as exc:
+            print(f"[{p['ticker']}] 지난 계획 평가 실패: {type(exc).__name__}")
+
+
+def _review_past_plans(journal: list) -> str:
+    """같은 종목은 가장 최근 과거 계획 한 건만 표시한다."""
+    lines = []
+    records = sorted(_latest_plans(journal, exclude_today=True).values(), key=lambda e: e["date"])
+    for entry in records[-5:]:
+        p = entry["order"]
+        status, price = p.get("review_status"), p.get("review_price")
+        result = f"{(price / p['entry'] - 1) * 100:+.2f}% [{status}]" if price is not None else "[가격 확인 실패]"
+        suffix = f" · 평가일 {p['review_date']}" if status in ("손절", "목표 도달") else ""
+        lines.append(f"- {entry['date']} {_display_name(p)}({p['ticker']}) "
+                     f"{entry['regime']}/{entry['strategy']}: {result}{suffix}")
     return "\n".join(lines) or "복기할 과거 계획 없음"
 
 
 # ── 06 운용부 ──────────────────────────────────────────────────────────────────
 def operations(state: DeskState) -> dict:
-    journal = _load_journal()
+    journal = state.get("journal")
+    if journal is None:
+        journal = _load_journal()
+        _refresh_journal(journal)
     review_text = _review_past_plans(journal)
     passed = [r for r in state["risk_reviews"] if r["verdict"] == "통과"]
     dossier = {d["ticker"]: d for d in _candidate_dossier(state)}
@@ -235,8 +342,10 @@ def operations(state: DeskState) -> dict:
 [지난 계획 복기 — 실패 패턴은 피하고 성공 패턴은 반영]
 {review_text}
 
+모든 요약·논리·재진입 사유는 반드시 한국어로 작성한다.
+재진입 계획은 이전 종료 결과와 달라진 근거를 reentry_reason에 반드시 명시한다.
 각 종목에 대해 entry(진입가, 현재가 근처), target(목표가, 손익비 2:1 이상 지향), thesis(한 줄 매수 논리)를 정한다.
-JSON 형식: {{"summary": "오늘 계획 2문장 (복기에서 얻은 교훈 포함)", "orders": [{{"ticker": "...", "entry": 0, "target": 0, "thesis": "..."}}]}}"""
+JSON 형식: {{"summary": "오늘 계획 2문장 (복기에서 얻은 교훈 포함)", "orders": [{{"ticker": "...", "entry": 0, "target": 0, "thesis": "...", "reentry_reason": "재진입일 때 달라진 근거, 신규면 빈 문자열"}}]}}"""
         try:
             raw = ask_claude_json(prompt)
             risk_by_ticker = {r["ticker"]: r for r in passed}
@@ -247,12 +356,16 @@ JSON 형식: {{"summary": "오늘 계획 2문장 (복기에서 얻은 교훈 포
                     continue
                 if not (r["stop_loss"] < o["entry"] < o["target"]):
                     continue  # 손절 < 진입 < 목표 아니면 버림
+                reentry_reason = o.get("reentry_reason", "")
+                if r.get("plan_type") == "재진입 계획" and not _has_korean(reentry_reason):
+                    continue
                 orders.append({
                     "name": d["name"], "ticker": d["ticker"], "market": d.get("market", "KR"),
                     "entry": o["entry"], "target": o["target"], "stop_loss": r["stop_loss"],
                     "weight_pct": r["weight_pct"], "thesis": o.get("thesis", ""),
+                    "plan_type": r.get("plan_type", "신규 계획"), "reentry_reason": reentry_reason,
                 })
-            plan = {"summary": raw.get("summary", ""), "orders": orders}
+            plan = {"summary": raw.get("summary", "") if orders else "계획 기준을 통과한 종목이 없어 오늘은 관망합니다.", "orders": orders}
         except Exception as e:
             print(f"[운용부] 계획 수립 실패: {e}")
 
@@ -272,6 +385,12 @@ def notify(state: DeskState) -> dict:
     if not state.get("headlines"):
         print("뉴스 없음: Teams 전송 생략")
         return {}
+    explanations = [state["regime"]["strategy"], state["regime"]["rationale"], state["plan"]["summary"]]
+    explanations += [c.get("reason") for c in state["candidates"]]
+    explanations += [r.get("reason") for r in state["risk_reviews"]]
+    explanations += [o.get("thesis") for o in state["plan"]["orders"]]
+    if any(not _has_korean(text) for text in explanations):
+        raise RuntimeError("한국어 설명 검증 실패: Teams 전송 중단")
     regime, plan = state["regime"], state["plan"]
     techs, funds = state["technicals"], state["fundamentals"]
     head = lambda text: {"type": "TextBlock", "text": text, "weight": "Bolder", "size": "Medium", "separator": True, "spacing": "Medium"}
@@ -299,18 +418,19 @@ def notify(state: DeskState) -> dict:
     for o in plan["orders"]:
         m = o["market"]
         body += [
-            {"type": "TextBlock", "text": f"🎯 {o['name']} ({o['ticker']}) · 비중 {o['weight_pct']:g}%", "weight": "Bolder", "color": "Good", "spacing": "Small"},
+            {"type": "TextBlock", "text": f"🎯 {o['name']} ({o['ticker']}) · {o.get('plan_type', '신규 계획')} · 비중 {o['weight_pct']:g}%", "weight": "Bolder", "color": "Good", "spacing": "Small"},
             {"type": "FactSet", "facts": [
                 {"title": "진입", "value": format_money(o["entry"], m)},
                 {"title": "목표", "value": format_money(o["target"], m)},
                 {"title": "손절", "value": format_money(o["stop_loss"], m)},
                 {"title": "논리", "value": o["thesis"]},
+                *([{"title": "재진입 사유", "value": o["reentry_reason"]}] if o.get("reentry_reason") else []),
             ]},
         ]
     body += [
         head("📚 지난 계획 복기"),
         line(state["review_text"].replace("\n", "\n\n")),
-        {"type": "TextBlock", "text": "과거 성과는 미래 수익을 보장하지 않습니다.", "wrap": True, "size": "Small", "isSubtle": True, "separator": True},
+        {"type": "TextBlock", "text": "복기는 일별 종가 기준의 계획 평가이며 실제 매매 체결 내역이 아닙니다. 과거 성과는 미래 수익을 보장하지 않습니다.", "wrap": True, "size": "Small", "isSubtle": True, "separator": True},
     ]
     url = os.environ.get("TEAMS_WEBHOOK_URL")
     if not url:
