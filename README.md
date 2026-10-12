@@ -214,8 +214,9 @@ daily-market-briefing/
 * **⚡ 실시간 감시 (장중)**: 기존 GitHub Actions `realtime.yml` 유지
 * **🏢 AI 트레이딩 데스크**: 로컬 cron으로 월~금 09:30 KST에 `trading_desk.py` 실행
 
-트레이딩 데스크는 한국경제·연합뉴스 공식 증권 RSS의 최근 24시간 뉴스를 우선 수집하고, 없을 때만 Google News RSS를 사용합니다. Google 요청 제한(429)이 발생하면 연속 재요청을 멈춥니다. 모든 경로에서 최신 뉴스를 수집하지 못하면 분석·저널 저장·Teams 전송을 중단합니다.
 * **⌨️ Teams 온디맨드 조회**: 필요할 때마다 `Teams Stock Command` 워크플로우를 `workflow_dispatch`로 호출
+
+트레이딩 데스크는 Yahoo Finance 종목별 RSS에서 한국·미국 지수 및 주요 종목 관련 뉴스를 수집합니다. 최근 24시간을 사용하되, 월요일에는 주말을 포함한 최근 72시간을 사용합니다. 요청 제한(429)이 발생하면 추가 요청을 멈추고, 최신 뉴스가 없으면 분석·저널 저장·Teams 전송을 중단합니다. 야후의 한국 종목 뉴스는 국내 전체 종목을 포괄하지 않을 수 있습니다.
 
 ### Codex runbook
 
