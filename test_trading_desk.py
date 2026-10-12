@@ -19,7 +19,8 @@ assert r["C"]["verdict"] == "보류" and r["D"]["verdict"] == "보류", r
 
 # 스크리닝 한·미 균형: KR 2개뿐이면 US로 채움
 c = lambda m, i: {"name": f"{m}{i}", "ticker": f"{m}{i}", "market": m}
-td.get_finance_news_headlines = lambda: []
+td.get_finance_news_headlines = lambda: ["테스트 뉴스"]
+td.fetch_company_name_by_code = lambda _: None
 td.extract_tickers_from_news = td.align_stocks_to_news_context = lambda *a: []
 td.validate_target_stocks = lambda _: [c("US", i) for i in range(10)] + [c("KR", i) for i in range(2)]
 picked = [x["market"] for x in td.screening({})["candidates"]]

@@ -65,6 +65,8 @@ def _num(x):
 # ── 01 스크리닝부 ──────────────────────────────────────────────────────────────
 def screening(state: DeskState) -> dict:
     headlines = get_finance_news_headlines()
+    if not headlines:
+        raise RuntimeError("뉴스 수집 실패: 트레이딩 데스크 실행·저널 저장·Teams 전송 중단")
     stocks = align_stocks_to_news_context(headlines, extract_tickers_from_news(headlines))
     validated = validate_target_stocks(stocks)
     for c in validated:  # 국내 상장은 네이버 공식 한글명으로 (Samsung Electronics → 삼성전자)
@@ -207,7 +209,7 @@ def _review_past_plans(journal: list) -> str:
             try:
                 now = float(yf.Ticker(p["ticker"]).history(period="5d")["Close"].dropna().iloc[-1])
                 ret = (now / p["entry"] - 1) * 100
-                hit = "손절선 이탈" if now <= p["stop_loss"] else ("목표 도달" if now >= p["target"] else "진행중")
+                hit = "손절" if now <= p["stop_loss"] else ("목표 도달" if now >= p["target"] else "진행중")
                 lines.append(f"- {entry['date']} {p['name']}({p['ticker']}) {entry['regime']}/{entry['strategy']}: {ret:+.2f}% [{hit}]")
             except Exception:
                 continue
@@ -267,6 +269,9 @@ JSON 형식: {{"summary": "오늘 계획 2문장 (복기에서 얻은 교훈 포
 
 # ── Teams 전송 ─────────────────────────────────────────────────────────────────
 def notify(state: DeskState) -> dict:
+    if not state.get("headlines"):
+        print("뉴스 없음: Teams 전송 생략")
+        return {}
     regime, plan = state["regime"], state["plan"]
     techs, funds = state["technicals"], state["fundamentals"]
     head = lambda text: {"type": "TextBlock", "text": text, "weight": "Bolder", "size": "Medium", "separator": True, "spacing": "Medium"}

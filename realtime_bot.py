@@ -329,25 +329,60 @@ def validate_target_stocks(target_stocks):
     return validated
 
 def get_finance_news_headlines():
-    """Google News RSS에서 최근 1일 증시 헤드라인 수집
-    (네이버 금융 mainnews는 stock.naver.com CSR 페이지로 이전되어 스크래핑 불가)"""
+    """공식 증권 RSS 우선, Google 검색 RSS는 대체 경로로만 사용."""
     import xml.etree.ElementTree as ET
+    from datetime import datetime, timedelta, timezone
+    from email.utils import parsedate_to_datetime
+
     headlines = []
-    for q in ("특징주", "증시", "코스피", "뉴욕증시"):
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=1)
+
+    def collect(url, label, params=None, strip_source=False):
         try:
-            r = requests.get(
-                "https://news.google.com/rss/search",
-                params={"q": f"{q} when:1d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"},
-                headers={"User-Agent": "Mozilla/5.0"},
-                timeout=10,
+            response = requests.get(
+                url, params=params, headers={"User-Agent": "Mozilla/5.0"}, timeout=10,
             )
-            r.raise_for_status()
-            for item in ET.fromstring(r.content).iter("item"):
-                title = re.sub(r"\s+-\s+[^-]+$", "", item.findtext("title") or "").strip()  # 언론사명 제거
+            if response.status_code == 429 or "/sorry/" in response.url:
+                print(f"뉴스 수집 제한({label}): HTTP {response.status_code}, 재요청 생략")
+                return False
+            response.raise_for_status()
+            count = 0
+            for item in ET.fromstring(response.content).iter("item"):
+                try:
+                    published = parsedate_to_datetime(item.findtext("pubDate") or "")
+                    if published.tzinfo is None or not cutoff <= published <= now:
+                        continue
+                except (ValueError, TypeError, OverflowError):
+                    continue
+                title = (item.findtext("title") or "").strip()
+                if strip_source:
+                    title = re.sub(r"\s+-\s+[^-]+$", "", title).strip()
                 if title and title not in headlines:
                     headlines.append(title)
-        except Exception as e:
-            print(f"뉴스 수집 실패({q}): {e}")
+                    count += 1
+                    if count >= 24:
+                        break
+            print(f"뉴스 수집({label}): 최근 24시간 {count}개")
+            return True
+        except (requests.RequestException, ET.ParseError) as exc:
+            # 리다이렉트 URL/차단 토큰 대신 오류 종류만 기록한다.
+            print(f"뉴스 수집 실패({label}): {type(exc).__name__}")
+            return True
+
+    for url, label in (
+        ("https://www.hankyung.com/feed/finance", "한국경제 증권"),
+        ("https://www.yna.co.kr/rss/market.xml", "연합뉴스 증권"),
+    ):
+        collect(url, label)
+    if not headlines:
+        for query in ("특징주", "증시", "코스피", "뉴욕증시"):
+            if not collect(
+                "https://news.google.com/rss/search", f"Google {query}",
+                params={"q": f"{query} when:1d", "hl": "ko", "gl": "KR", "ceid": "KR:ko"},
+                strip_source=True,
+            ):
+                break  # 차단 상태에서 같은 서비스에 연속 요청하지 않는다.
     return headlines[:45]
 
 def extract_tickers_from_news(headlines):

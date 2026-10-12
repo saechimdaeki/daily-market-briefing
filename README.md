@@ -212,6 +212,9 @@ daily-market-briefing/
 * **🌅 Morning Briefing**: 평일 09:20 (미장 마감 요약 및 국장 프리뷰)
 * **🌇 Evening Briefing**: 평일 16:00 (국장 마감 요약 및 미장 프리뷰)
 * **⚡ 실시간 감시 (장중)**: 기존 GitHub Actions `realtime.yml` 유지
+* **🏢 AI 트레이딩 데스크**: 로컬 cron으로 월~금 09:30 KST에 `trading_desk.py` 실행
+
+트레이딩 데스크는 한국경제·연합뉴스 공식 증권 RSS의 최근 24시간 뉴스를 우선 수집하고, 없을 때만 Google News RSS를 사용합니다. Google 요청 제한(429)이 발생하면 연속 재요청을 멈춥니다. 모든 경로에서 최신 뉴스를 수집하지 못하면 분석·저널 저장·Teams 전송을 중단합니다.
 * **⌨️ Teams 온디맨드 조회**: 필요할 때마다 `Teams Stock Command` 워크플로우를 `workflow_dispatch`로 호출
 
 ### Codex runbook
