@@ -307,16 +307,22 @@ def _refresh_journal(journal):
 
 
 def _review_past_plans(journal: list) -> str:
-    """같은 종목은 가장 최근 과거 계획 한 건만 표시한다."""
+    """진행중 계획은 전부, 종료(익절·손절)된 계획은 한 번만 알리고 이후 숨김. 같은 종목은 최근 계획 한 건만."""
     lines = []
     records = sorted(_latest_plans(journal, exclude_today=True).values(), key=lambda e: e["date"])
-    for entry in records[-5:]:
+    for entry in records:
         p = entry["order"]
         status, price = p.get("review_status"), p.get("review_price")
-        result = f"{(price / p['entry'] - 1) * 100:+.2f}% [{status}]" if price is not None else "[가격 확인 실패]"
-        suffix = f" · 평가일 {p['review_date']}" if status in ("손절", "목표 도달") else ""
-        lines.append(f"- {entry['date']} {_display_name(p)}({p['ticker']}) "
-                     f"{entry['regime']}/{entry['strategy']}: {result}{suffix}")
+        closed = status in ("손절", "목표 도달")
+        if closed and p.get("review_reported"):
+            continue
+        if closed:
+            p["review_reported"] = True  # operations()가 저널 저장 시 함께 기록
+        label = "익절" if status == "목표 도달" else (status or "확인 전")
+        ret = f"{(price / p['entry'] - 1) * 100:+.2f}%" if price is not None else "가격 확인 실패"
+        when = f" {p['review_date']}" if closed else ""
+        lines.append(f"- {entry['date'][:10]} 진입 {_display_name(p)}({p['ticker']}): "
+                     f"[{label}{when}] {ret} · {entry['regime']}/{entry['strategy']}")
     return "\n".join(lines) or "복기할 과거 계획 없음"
 
 

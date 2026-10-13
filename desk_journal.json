@@ -12,7 +12,10 @@
     "target": 136,
     "stop_loss": 112,
     "weight_pct": 8.0,
-    "thesis": "20년 LNG 공급 계약으로 현금흐름 안정, RSI 과매도 신호와 Fibonacci 500 지지(121.81) 활용한 반등 기회, 배당성 우수한 방어주"
+    "thesis": "20년 LNG 공급 계약으로 현금흐름 안정, RSI 과매도 신호와 Fibonacci 500 지지(121.81) 활용한 반등 기회, 배당성 우수한 방어주",
+    "review_status": "목표 도달",
+    "review_price": 137.55999755859375,
+    "review_date": "2026-10-12"
    }
   ]
  },
@@ -37,6 +40,152 @@
   "date": "2026-10-06 13:07",
   "regime": "상승장",
   "strategy": "테마주 순환매+선별 강화",
+  "orders": []
+ },
+ {
+  "date": "2026-10-07 09:31",
+  "regime": "상승장",
+  "strategy": "AI·반도체 추세추종+성장주 오버웨이트",
+  "orders": [
+   {
+    "name": "삼성SDI",
+    "ticker": "006400.KS",
+    "market": "KR",
+    "entry": 564000,
+    "target": 588000,
+    "stop_loss": 552000,
+    "weight_pct": 12.0,
+    "thesis": "포스코퓨처엠 6조원 계약 체결 호재 및 MACD 골든크로스 기술적 신호",
+    "review_status": "목표 도달",
+    "review_price": 591000.0,
+    "review_date": "2026-10-12",
+    "review_reported": true
+   },
+   {
+    "name": "포스코퓨처엠",
+    "ticker": "003670.KS",
+    "market": "KR",
+    "entry": 194000,
+    "target": 203000,
+    "stop_loss": 189650,
+    "weight_pct": 12.0,
+    "thesis": "삼성SDI와의 6조원 계약 호재 수혜 및 AI·반도체 추세추종 매매",
+    "review_status": "손절",
+    "review_price": 165800.0,
+    "review_date": "2026-10-13",
+    "review_reported": true
+   }
+  ]
+ },
+ {
+  "date": "2026-10-08 08:59",
+  "regime": "상승장",
+  "strategy": "추세추종+성장주 집중",
+  "orders": [
+   {
+    "name": "삼성전자",
+    "ticker": "005930.KS",
+    "market": "KR",
+    "entry": 268500,
+    "target": 280000,
+    "stop_loss": 263000,
+    "weight_pct": 15.0,
+    "thesis": "3분기 영업이익 100조 돌파, AI 반도체 수요 강세에 따른 기술주 추세추종 매수",
+    "review_status": "손절",
+    "review_price": 262000.0,
+    "review_date": "2026-10-08",
+    "review_reported": true
+   }
+  ]
+ },
+ {
+  "date": "2026-10-12 08:55",
+  "regime": "하락장",
+  "strategy": "현금비중 확대+방어주",
+  "orders": []
+ },
+ {
+  "date": "2026-10-12 09:32",
+  "regime": "하락장",
+  "strategy": "현금비중 확대+우량방어주+저점매수",
+  "orders": [
+   {
+    "name": "삼성전자",
+    "ticker": "005930.KS",
+    "market": "KR",
+    "entry": 260000,
+    "target": 280000,
+    "stop_loss": 255000,
+    "weight_pct": 18.0,
+    "thesis": "AI 반도체 수요로 기록적 수익 중인 삼성전자를 하락장 저점에서 우량방어주로 장기 매수",
+    "review_status": "손절",
+    "review_price": 250500.0,
+    "review_date": "2026-10-12",
+    "review_reported": true
+   },
+   {
+    "name": "SK하이닉스",
+    "ticker": "000660.KS",
+    "market": "KR",
+    "entry": 1640000,
+    "target": 1700000,
+    "stop_loss": 1620000,
+    "weight_pct": 12.0,
+    "thesis": "AI 메모리 수요 기대감으로 기준선 지지 부근에서 저가 매수, 선별적 기회 포착",
+    "review_status": "손절",
+    "review_price": 1523000.0,
+    "review_date": "2026-10-13",
+    "review_reported": true
+   }
+  ]
+ },
+ {
+  "date": "2026-10-12 09:55",
+  "regime": "하락장",
+  "strategy": "현금비중 확대+우량주 추가 매수",
+  "orders": [
+   {
+    "name": "마이크론",
+    "ticker": "MU",
+    "market": "US",
+    "entry": 1029,
+    "target": 1247,
+    "stop_loss": 920,
+    "weight_pct": 14.0,
+    "thesis": "월스트리트 $3,000 목표가, AI 메모리 초호황 저평가 매수",
+    "plan_type": "신규 계획",
+    "reentry_reason": "",
+    "review_status": "진행중",
+    "review_price": 989.0399780273438,
+    "review_date": "2026-10-12"
+   },
+   {
+    "name": "브로드컴",
+    "ticker": "AVGO",
+    "market": "US",
+    "entry": 361.54,
+    "target": 404.62,
+    "stop_loss": 340,
+    "weight_pct": 14.0,
+    "thesis": "OpenAI 지출 흐름 편승, AI 인프라 선제적 진입",
+    "plan_type": "신규 계획",
+    "reentry_reason": "",
+    "review_status": "진행중",
+    "review_price": 354.7300109863281,
+    "review_date": "2026-10-12"
+   }
+  ]
+ },
+ {
+  "date": "2026-10-13 08:30",
+  "regime": "횡보장",
+  "strategy": "관망",
+  "orders": []
+ },
+ {
+  "date": "2026-10-13 09:31",
+  "regime": "하락장",
+  "strategy": "현금비중 확대+방어주",
   "orders": []
  }
 ]

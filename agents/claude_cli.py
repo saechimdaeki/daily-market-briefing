@@ -30,13 +30,7 @@ def ask_claude(prompt: str, system: str = "", timeout: int = 400) -> str:
     return result.stdout.strip()
 
 
-def ask_claude_json(prompt: str, system: str = "", timeout: int = 400):
-    """JSON 응답이 필요한 호출용 — 코드펜스/잡설 제거 후 파싱해 dict 또는 list 반환."""
-    text = ask_claude(
-        prompt + "\n\n반드시 유효한 JSON만 출력하라. 설명·코드펜스·백틱 금지.",
-        system,
-        timeout,
-    )
+def _parse_json(text: str):
     raw = re.sub(r"^```(?:json)?\s*", "", text.strip())
     raw = re.sub(r"\s*```$", "", raw)
     try:
@@ -47,3 +41,20 @@ def ask_claude_json(prompt: str, system: str = "", timeout: int = 400):
         if start != -1 and end > start:
             return json.loads(raw[start : end + 1])
         raise
+
+
+def ask_claude_json(prompt: str, system: str = "", timeout: int = 400, retries: int = 1):
+    """JSON 응답이 필요한 호출용 — 코드펜스/잡설 제거 후 파싱해 dict 또는 list 반환.
+    LLM이 깨진 JSON을 내면(따옴표 미이스케이프 등) 한 번 더 요청한다."""
+    for attempt in range(retries + 1):
+        text = ask_claude(
+            prompt + "\n\n반드시 유효한 JSON만 출력하라. 설명·코드펜스·백틱 금지. 문자열 안 큰따옴표는 쓰지 말 것.",
+            system,
+            timeout,
+        )
+        try:
+            return _parse_json(text)
+        except json.JSONDecodeError as e:
+            if attempt == retries:
+                raise
+            print(f"JSON 파싱 실패({e}) → 재요청")
