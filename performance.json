@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03 15:11 KST",
+  "generated_at": "2026-11-03 15:20 KST",
   "as_of": "2026-11-03",
   "period_basis": "계획 생성일 기준, 최근 N일은 오늘 포함 달력일",
   "summaries": {
@@ -37,6 +37,8 @@
       "weight_pct": 8.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 561.0,
       "stop_loss": 480.0,
       "fill_price": null,
@@ -46,6 +48,10 @@
       "thesis": "RSI 과매도 구간에서 단기 반등 기대 및 5G 엣지 AI 시장 성장 기조",
       "evaluation_error": "계획 생성 이후 5분봉 없음: 가상 체결 확인 대기",
       "closed": false,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": null
     },
     {
@@ -59,6 +65,8 @@
       "weight_pct": 12.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 341.0,
       "stop_loss": 310.0,
       "fill_price": 320.0,
@@ -68,6 +76,10 @@
       "thesis": "AI 기술 리더의 Dow Jones 선물 상승 포함, RSI 과매도 반등 기회, 강건한 현금흐름(순현금 $121.68B)",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -3.125
     },
     {
@@ -81,6 +93,8 @@
       "weight_pct": 6.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 1705.0,
       "stop_loss": 1618.0,
       "fill_price": 1640.0055,
@@ -90,6 +104,10 @@
       "thesis": "반도체 장비 수요 증가, RSI 과매도 반등 기회",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -1.3418
     },
     {
@@ -103,6 +121,8 @@
       "weight_pct": 8.0,
       "plan_type": "재진입 계획",
       "reentry_reason": "이전 손절 후 RSI 33.71 과매도 진입권 재확보, SK하이닉스 +5% 등 칩 섹터 강한 반등 확인, VIX +21.24% 상승으로 저점 신호 재확인",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 447.0,
       "stop_loss": 412.59,
       "fill_price": 417.48,
@@ -112,6 +132,10 @@
       "thesis": "과매도 RSI(33.71)와 칩 섹터 반등이 수렴하는 저점 재진입 신호",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -1.1713
     },
     {
@@ -125,6 +149,8 @@
       "weight_pct": 15.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 226.0,
       "stop_loss": 210.0,
       "fill_price": 215.0,
@@ -134,6 +160,10 @@
       "thesis": "RSI 과매도 진입권에서의 AI 기술주 반등 기회, 순현금 23.6B로 재무 안정성 우수",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -2.3256
     },
     {
@@ -147,6 +177,8 @@
       "weight_pct": 12.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 447.0,
       "stop_loss": 415.0,
       "fill_price": 421.2200012207031,
@@ -156,6 +188,10 @@
       "thesis": "초과매도 회복 + 대만 생산능력 확대로 박스권 상단 돌파 기대",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -1.4767
     },
     {
@@ -169,6 +205,8 @@
       "weight_pct": 14.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 1247.0,
       "stop_loss": 920.0,
       "fill_price": 1002.4099731445312,
@@ -178,6 +216,10 @@
       "thesis": "월스트리트 $3,000 목표가, AI 메모리 초호황 저평가 매수",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -8.2212
     },
     {
@@ -191,6 +233,8 @@
       "weight_pct": 14.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 404.62,
       "stop_loss": 340.0,
       "fill_price": 359.7049865722656,
@@ -200,6 +244,10 @@
       "thesis": "OpenAI 지출 흐름 편승, AI 인프라 선제적 진입",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -5.9396
     },
     {
@@ -213,6 +261,8 @@
       "weight_pct": 18.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 280000.0,
       "stop_loss": 255000.0,
       "fill_price": 260000.0,
@@ -222,6 +272,10 @@
       "thesis": "AI 반도체 수요로 기록적 수익 중인 삼성전자를 하락장 저점에서 우량방어주로 장기 매수",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -1.9231
     },
     {
@@ -235,6 +289,8 @@
       "weight_pct": 12.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 1700000.0,
       "stop_loss": 1620000.0,
       "fill_price": 1640000.0,
@@ -244,6 +300,10 @@
       "thesis": "AI 메모리 수요 기대감으로 기준선 지지 부근에서 저가 매수, 선별적 기회 포착",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -1.2195
     },
     {
@@ -257,6 +317,8 @@
       "weight_pct": 15.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 280000.0,
       "stop_loss": 263000.0,
       "fill_price": null,
@@ -266,6 +328,10 @@
       "thesis": "3분기 영업이익 100조 돌파, AI 반도체 수요 강세에 따른 기술주 추세추종 매수",
       "evaluation_error": "",
       "closed": false,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": null
     },
     {
@@ -279,6 +345,8 @@
       "weight_pct": 12.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 588000.0,
       "stop_loss": 552000.0,
       "fill_price": 564000.0,
@@ -288,6 +356,10 @@
       "thesis": "포스코퓨처엠 6조원 계약 체결 호재 및 MACD 골든크로스 기술적 신호",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": 4.2553
     },
     {
@@ -301,6 +373,8 @@
       "weight_pct": 12.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 203000.0,
       "stop_loss": 189650.0,
       "fill_price": 190550.0,
@@ -310,6 +384,10 @@
       "thesis": "삼성SDI와의 6조원 계약 호재 수혜 및 AI·반도체 추세추종 매매",
       "evaluation_error": "",
       "closed": true,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": -0.4723
     },
     {
@@ -323,6 +401,8 @@
       "weight_pct": 20.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 330000.0,
       "stop_loss": 255000.0,
       "fill_price": null,
@@ -332,6 +412,10 @@
       "thesis": "기술주 강세 주기에서 AI 관련 호재(PTC 폭등, NVIDIA 관심주)에 수혜받는 메모리반도체 최강주, 20일선 위 상승 추세 지속",
       "evaluation_error": "",
       "closed": false,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": null
     },
     {
@@ -345,6 +429,8 @@
       "weight_pct": 8.0,
       "plan_type": "신규 계획",
       "reentry_reason": "",
+      "position_purpose": "상승 대응",
+      "invalidation": "",
       "target": 136.0,
       "stop_loss": 112.0,
       "fill_price": null,
@@ -354,7 +440,19 @@
       "thesis": "20년 LNG 공급 계약으로 현금흐름 안정, RSI 과매도 신호와 Fibonacci 500 지지(121.81) 활용한 반등 기회, 배당성 우수한 방어주",
       "evaluation_error": "",
       "closed": false,
+      "instrument_type": "주식",
+      "exposure": "주식 상승 대응",
+      "daily_leverage": 1,
+      "max_weight_pct": 20,
       "return_pct": null
     }
-  ]
+  ],
+  "outlook": {
+    "date": "2026-11-03 15:03",
+    "regime": "하락장",
+    "strategy": "현금비중 확대+방어주 선별",
+    "rationale": "",
+    "summary": ""
+  },
+  "decisions": []
 }
