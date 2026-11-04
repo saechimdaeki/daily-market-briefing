@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-03 16:16 KST",
-  "as_of": "2026-11-03",
+  "generated_at": "2026-11-04 09:50 KST",
+  "as_of": "2026-11-04",
   "period_basis": "계획 생성일 기준, 최근 N일은 오늘 포함 달력일",
   "summaries": {
     "7": {
@@ -32,7 +32,7 @@
       "ticker": "MSFT",
       "name": "마이크로소프트",
       "market": "US",
-      "status": "진입 대기",
+      "status": "보유",
       "entry": 507.0,
       "weight_pct": 8.0,
       "plan_type": "신규 계획",
@@ -41,18 +41,18 @@
       "invalidation": "",
       "target": 561.0,
       "stop_loss": 480.0,
-      "fill_price": null,
-      "review_price": null,
-      "filled_at": null,
-      "review_date": null,
+      "fill_price": 505.58,
+      "review_price": 514.5,
+      "filled_at": "2026-11-03 18:00",
+      "review_date": "2026-11-04 09:32",
       "thesis": "RSI 과매도 구간에서 단기 반등 기대 및 5G 엣지 AI 시장 성장 기조",
-      "evaluation_error": "평가 확인 중",
+      "evaluation_error": "",
       "closed": false,
       "instrument_type": "주식",
       "exposure": "주식 상승 대응",
       "daily_leverage": 1,
       "max_weight_pct": 20,
-      "return_pct": null
+      "return_pct": 1.7643
     },
     {
       "created_at": "2026-10-26 09:33",
@@ -448,30 +448,54 @@
     }
   ],
   "outlook": {
-    "date": "2026-11-03 16:14",
+    "date": "2026-11-04 09:32",
     "regime": "하락장",
     "strategy": "인버스 하락 대응·방어주 상대강도·현금 비교",
-    "rationale": "US: 하락장 · KR: 횡보장. 미국 주요 지수 추세 하락. 완료 일봉 기준이며 뉴스가 수치 판정을 변경하지 않습니다.",
+    "rationale": "US: 하락장 · KR: 확인 불가. 미국 주요 지수 추세 하락. 완료 일봉 기준이며 뉴스가 수치 판정을 변경하지 않습니다.",
     "summary": "이번 실행의 신규 계획은 없습니다. 기존 계획은 아래에서 계속 확인합니다."
   },
   "decisions": [
     {
-      "ticker": "SOXS",
+      "ticker": "005930.KS",
       "verdict": "보류",
-      "reason": "인버스 목적 또는 무효화 조건 누락",
-      "exposure": "반도체 하락 대응"
+      "reason": "해당 시장 장세/필수 지표 미확인 / 기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
     },
     {
-      "ticker": "SH",
+      "ticker": "000660.KS",
       "verdict": "보류",
-      "reason": "인버스 목적 또는 무효화 조건 누락",
-      "exposure": "미국 지수 하락 대응"
+      "reason": "해당 시장 장세/필수 지표 미확인 / 기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
     },
     {
-      "ticker": "KO",
+      "ticker": "NVDA",
       "verdict": "보류",
       "reason": "기업 실적 일정 미확인",
-      "exposure": "필수소비재 방어주"
+      "exposure": "주식 상승 대응"
+    },
+    {
+      "ticker": "MU",
+      "verdict": "보류",
+      "reason": "기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
+    },
+    {
+      "ticker": "AAPL",
+      "verdict": "보류",
+      "reason": "기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
+    },
+    {
+      "ticker": "INTC",
+      "verdict": "보류",
+      "reason": "기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
+    },
+    {
+      "ticker": "DELL",
+      "verdict": "보류",
+      "reason": "기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
     }
   ],
   "context": {
@@ -482,67 +506,67 @@
         "allow_new": true
       },
       "KR": {
-        "regime": "횡보장",
-        "reason": "완료 일봉 20·60일선과 5일 추세의 일치 여부",
-        "allow_new": true
+        "regime": "확인 불가",
+        "reason": "필수 시장 지표 누락",
+        "allow_new": false
       }
     },
     "sectors": [
       {
-        "ticker": "XLP",
-        "name": "필수소비재",
-        "chg_5d": 3.26,
-        "relative_5d": 5.0,
-        "above_ma20": true,
-        "as_of": "2026-11-02T00:00:00-05:00"
-      },
-      {
         "ticker": "XLV",
         "name": "헬스케어",
-        "chg_5d": 2.97,
-        "relative_5d": 4.7,
+        "chg_5d": 2.7,
+        "relative_5d": 4.69,
         "above_ma20": true,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
       },
       {
         "ticker": "XLF",
         "name": "금융",
-        "chg_5d": 2.75,
-        "relative_5d": 4.48,
+        "chg_5d": 2.34,
+        "relative_5d": 4.33,
         "above_ma20": true,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
+      },
+      {
+        "ticker": "XLP",
+        "name": "필수소비재",
+        "chg_5d": 2.07,
+        "relative_5d": 4.05,
+        "above_ma20": true,
+        "as_of": "2026-11-03T00:00:00-05:00"
       },
       {
         "ticker": "XLU",
         "name": "유틸리티",
-        "chg_5d": 2.63,
-        "relative_5d": 4.37,
+        "chg_5d": 1.33,
+        "relative_5d": 3.32,
         "above_ma20": true,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
       },
       {
         "ticker": "XLE",
         "name": "에너지",
-        "chg_5d": -3.43,
-        "relative_5d": -1.7,
+        "chg_5d": -2.24,
+        "relative_5d": -0.25,
         "above_ma20": false,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
       },
       {
         "ticker": "XLK",
         "name": "기술",
-        "chg_5d": -6.49,
-        "relative_5d": -4.76,
+        "chg_5d": -6.85,
+        "relative_5d": -4.86,
         "above_ma20": false,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
       },
       {
         "ticker": "SOXX",
         "name": "반도체",
-        "chg_5d": -7.76,
-        "relative_5d": -6.03,
+        "chg_5d": -9.01,
+        "relative_5d": -7.02,
         "above_ma20": false,
-        "as_of": "2026-11-02T00:00:00-05:00"
+        "as_of": "2026-11-03T00:00:00-05:00"
       }
     ],
     "breadth": {
@@ -550,8 +574,8 @@
       "coverage": 7,
       "universe": 7,
       "sector_above_ma20_pct": 57.1,
-      "equal_weight_relative_5d": 2.97,
-      "small_cap_relative_5d": 2.51
+      "equal_weight_relative_5d": 2.79,
+      "small_cap_relative_5d": 1.85
     },
     "strategy": "인버스 하락 대응·방어주 상대강도·현금 비교",
     "reason": "미국 주요 지수 추세 하락",
@@ -559,36 +583,36 @@
       "US": {
         "market": "US",
         "state": "정규장 외",
-        "last_completed_session": "2026-11-02",
-        "next_open": "2026-11-03T14:30:00+00:00",
-        "next_close": "2026-11-03T21:00:00+00:00",
-        "checked_at": "2026-11-03T07:14:13.660650+00:00"
+        "last_completed_session": "2026-11-03",
+        "next_open": "2026-11-04T14:30:00+00:00",
+        "next_close": "2026-11-04T21:00:00+00:00",
+        "checked_at": "2026-11-04T00:30:04.195559+00:00"
       },
       "KR": {
         "market": "KR",
-        "state": "정규장 외",
+        "state": "정규장 진행 중",
         "last_completed_session": "2026-11-03",
         "next_open": "2026-11-04T00:00:00+00:00",
         "next_close": "2026-11-04T06:30:00+00:00",
-        "checked_at": "2026-11-03T07:14:13.660650+00:00"
+        "checked_at": "2026-11-04T00:30:04.195559+00:00"
       }
     },
     "macro": {
       "sources": {
         "BLS": {
           "status": "미확인",
-          "checked_at": "2026-11-03T07:14:13.660650+00:00"
+          "checked_at": "2026-11-04T00:30:04.195559+00:00"
         },
         "FOMC": {
           "status": "확인",
-          "checked_at": "2026-11-03T07:14:13.660650+00:00"
+          "checked_at": "2026-11-04T00:30:04.195559+00:00"
         }
       },
       "events": [],
       "coverage": "미국 BLS 물가·고용 및 FOMC · 국내 정책 일정/기업행사 전체를 포괄하지 않음",
-      "checked_at": "2026-11-03T07:14:13.660650+00:00"
+      "checked_at": "2026-11-04T00:30:04.195559+00:00"
     },
-    "checked_at": "2026-11-03T07:14:13.660650+00:00",
+    "checked_at": "2026-11-04T00:30:04.195559+00:00",
     "mode": "완료 일봉 기반 계획 · 장중 실시간 신호 아님",
     "event_warnings": [
       "BLS 일정 미확인: 이벤트 확인 범위 제한"
