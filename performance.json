@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04 09:50 KST",
+  "generated_at": "2026-11-04 09:57 KST",
   "as_of": "2026-11-04",
   "period_basis": "계획 생성일 기준, 최근 N일은 오늘 포함 달력일",
   "summaries": {
@@ -42,9 +42,9 @@
       "target": 561.0,
       "stop_loss": 480.0,
       "fill_price": 505.58,
-      "review_price": 514.5,
+      "review_price": 516.88,
       "filled_at": "2026-11-03 18:00",
-      "review_date": "2026-11-04 09:32",
+      "review_date": "2026-11-04 09:50",
       "thesis": "RSI 과매도 구간에서 단기 반등 기대 및 5G 엣지 AI 시장 성장 기조",
       "evaluation_error": "",
       "closed": false,
@@ -52,7 +52,7 @@
       "exposure": "주식 상승 대응",
       "daily_leverage": 1,
       "max_weight_pct": 20,
-      "return_pct": 1.7643
+      "return_pct": 2.2351
     },
     {
       "created_at": "2026-10-26 09:33",
@@ -448,7 +448,7 @@
     }
   ],
   "outlook": {
-    "date": "2026-11-04 09:32",
+    "date": "2026-11-04 09:57",
     "regime": "하락장",
     "strategy": "인버스 하락 대응·방어주 상대강도·현금 비교",
     "rationale": "US: 하락장 · KR: 확인 불가. 미국 주요 지수 추세 하락. 완료 일봉 기준이며 뉴스가 수치 판정을 변경하지 않습니다.",
@@ -456,13 +456,13 @@
   },
   "decisions": [
     {
-      "ticker": "005930.KS",
+      "ticker": "000660.KS",
       "verdict": "보류",
       "reason": "해당 시장 장세/필수 지표 미확인 / 기업 실적 일정 미확인",
       "exposure": "주식 상승 대응"
     },
     {
-      "ticker": "000660.KS",
+      "ticker": "005930.KS",
       "verdict": "보류",
       "reason": "해당 시장 장세/필수 지표 미확인 / 기업 실적 일정 미확인",
       "exposure": "주식 상승 대응"
@@ -480,19 +480,19 @@
       "exposure": "주식 상승 대응"
     },
     {
-      "ticker": "AAPL",
-      "verdict": "보류",
-      "reason": "기업 실적 일정 미확인",
-      "exposure": "주식 상승 대응"
-    },
-    {
       "ticker": "INTC",
       "verdict": "보류",
       "reason": "기업 실적 일정 미확인",
       "exposure": "주식 상승 대응"
     },
     {
-      "ticker": "DELL",
+      "ticker": "LRCX",
+      "verdict": "보류",
+      "reason": "기업 실적 일정 미확인",
+      "exposure": "주식 상승 대응"
+    },
+    {
+      "ticker": "QCOM",
       "verdict": "보류",
       "reason": "기업 실적 일정 미확인",
       "exposure": "주식 상승 대응"
@@ -586,7 +586,7 @@
         "last_completed_session": "2026-11-03",
         "next_open": "2026-11-04T14:30:00+00:00",
         "next_close": "2026-11-04T21:00:00+00:00",
-        "checked_at": "2026-11-04T00:30:04.195559+00:00"
+        "checked_at": "2026-11-04T00:54:50.119331+00:00"
       },
       "KR": {
         "market": "KR",
@@ -594,25 +594,25 @@
         "last_completed_session": "2026-11-03",
         "next_open": "2026-11-04T00:00:00+00:00",
         "next_close": "2026-11-04T06:30:00+00:00",
-        "checked_at": "2026-11-04T00:30:04.195559+00:00"
+        "checked_at": "2026-11-04T00:54:50.119331+00:00"
       }
     },
     "macro": {
       "sources": {
         "BLS": {
           "status": "미확인",
-          "checked_at": "2026-11-04T00:30:04.195559+00:00"
+          "checked_at": "2026-11-04T00:54:50.119331+00:00"
         },
         "FOMC": {
           "status": "확인",
-          "checked_at": "2026-11-04T00:30:04.195559+00:00"
+          "checked_at": "2026-11-04T00:54:50.119331+00:00"
         }
       },
       "events": [],
       "coverage": "미국 BLS 물가·고용 및 FOMC · 국내 정책 일정/기업행사 전체를 포괄하지 않음",
-      "checked_at": "2026-11-04T00:30:04.195559+00:00"
+      "checked_at": "2026-11-04T00:54:50.119331+00:00"
     },
-    "checked_at": "2026-11-04T00:30:04.195559+00:00",
+    "checked_at": "2026-11-04T00:54:50.119331+00:00",
     "mode": "완료 일봉 기반 계획 · 장중 실시간 신호 아님",
     "event_warnings": [
       "BLS 일정 미확인: 이벤트 확인 범위 제한"
