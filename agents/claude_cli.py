@@ -1,17 +1,79 @@
 import json
 import os
 import re
+import shutil
 import subprocess
+import tempfile
 
 CLAUDE_MODEL = os.environ.get("CLAUDE_MODEL", "claude-haiku-4-5-20251001")
+CHATGPT_CODEX = "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
+
+
+class CodexUnavailable(RuntimeError):
+    """로컬 Codex가 분석 결과를 생성하지 못했다."""
+
+
+def _ask_codex(prompt: str, system: str, timeout: int) -> str:
+    env = os.environ.copy()
+    env.pop("CODEX_API_KEY", None)
+    env.pop("OPENAI_API_KEY", None)
+    executable = shutil.which("codex") or CHATGPT_CODEX
+    print("[AI] 로컬 Codex CLI 호출", flush=True)
+    cmd = [
+        executable, "--ask-for-approval", "never", "exec",
+        "--sandbox", "read-only",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--ignore-user-config",
+        "-c", 'web_search="disabled"',
+        "-c", 'shell_environment_policy.inherit="none"',
+        "-",
+    ]
+    instructions = "제공된 프롬프트에 텍스트로만 답하라. 도구를 사용하거나 파일을 읽지 마라."
+    if system:
+        instructions += f"\n\n{system}"
+    try:
+        with tempfile.TemporaryDirectory(prefix="market-briefing-codex-") as workdir:
+            result = subprocess.run(
+                cmd, input=f"{instructions}\n\n{prompt}", cwd=workdir,
+                env=env, capture_output=True, text=True, encoding="utf-8", timeout=timeout,
+            )
+    except OSError as exc:
+        raise CodexUnavailable(f"Codex CLI를 실행할 수 없습니다: {executable}") from exc
+    except subprocess.TimeoutExpired as exc:
+        raise CodexUnavailable(f"Codex CLI 응답 시간 초과 ({timeout}초)") from exc
+    if result.returncode != 0:
+        raise CodexUnavailable(
+            f"Codex CLI 실패 (code {result.returncode}). 실행 권한과 Codex 인증 설정을 확인하세요."
+        )
+    response = result.stdout.strip()
+    if not response:
+        raise CodexUnavailable("Codex CLI가 빈 응답을 반환했습니다.")
+    print("[AI] 로컬 Codex CLI 응답 수신", flush=True)
+    return response
+
+
+def _claude_logged_in(env: dict, timeout: int) -> bool:
+    try:
+        status = subprocess.run(
+            ["claude", "auth", "status", "--json"], env=env,
+            capture_output=True, text=True, timeout=min(timeout, 10),
+        )
+        return status.returncode == 0 and json.loads(status.stdout).get("loggedIn") is True
+    except (FileNotFoundError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        return False
 
 
 def ask_claude(prompt: str, system: str = "", timeout: int = 400) -> str:
-    """claude CLI 헤드리스 모드(-p)로 단일 프롬프트를 실행하고 응답 텍스트를 반환.
+    """로컬 Claude 세션을 우선 사용하고, 사용할 수 없으면 Codex로 전환한다."""
+    env = os.environ.copy()
+    in_github_actions = env.get("GITHUB_ACTIONS") == "true"
+    if not in_github_actions:
+        env.pop("ANTHROPIC_API_KEY", None)
+        env.pop("ANTHROPIC_AUTH_TOKEN", None)
+        if not _claude_logged_in(env, timeout):
+            return _ask_codex(prompt, system, timeout)
 
-    로컬에서는 claude CLI의 구독 로그인, CI에서는 ANTHROPIC_API_KEY 환경변수를
-    CLI가 알아서 인식하므로 별도 분기가 필요 없다.
-    """
     cmd = [
         "claude",
         "-p",
@@ -23,11 +85,16 @@ def ask_claude(prompt: str, system: str = "", timeout: int = 400) -> str:
     if system:
         cmd += ["--append-system-prompt", system]
     result = subprocess.run(
-        cmd, input=prompt, capture_output=True, text=True, timeout=timeout
+        cmd, input=prompt, env=env, capture_output=True, text=True, timeout=timeout
     )
+    response = result.stdout.strip()
+    limited = re.match(r"^(?:you['’]ve hit your .*limit|usage limit|rate limit)", response, re.IGNORECASE)
+    if not in_github_actions and (result.returncode != 0 or not response or limited):
+        print("[AI] Claude CLI 응답 실패 또는 사용량 제한. Codex로 전환합니다.", flush=True)
+        return _ask_codex(prompt, system, timeout)
     if result.returncode != 0:
         raise RuntimeError(f"claude CLI 실패 (code {result.returncode}): {result.stderr[:500]}")
-    return result.stdout.strip()
+    return response
 
 
 def _parse_json(text: str):

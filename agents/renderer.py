@@ -52,6 +52,15 @@ def render_html(state: MarketBriefingState) -> dict:
         with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
             f.write(html_output)
 
+        from performance_dashboard import write_dashboard
+        import json
+        journal_path = os.environ.get("DESK_JOURNAL_PATH", "desk_journal.json")
+        journal = []
+        if os.path.exists(journal_path):
+            with open(journal_path, encoding="utf-8") as source:
+                journal = json.load(source)
+        write_dashboard(journal, OUTPUT_DIR)
+
         duration_ms = int((time.time() - t0) * 1000)
         return {
             "html_output": html_output,

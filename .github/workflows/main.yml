@@ -1,13 +1,8 @@
 name: Daily Market Briefing Automation
 
 on:
-  schedule:
-    # 1. 장 시작 후 브리핑: KST 월~금 오전 09:20 (UTC 월~금 00:20)
-    - cron: '20 00 * * 1-5'
-
-    # 2. 저녁 브리핑: KST 월~금 오후 16:00 (UTC 월~금 07:00) 수정 완료
-    - cron: '00 07 * * 1-5'
-    
+  # 정기 실행은 Codex cron automation이 담당합니다.
+  # 이 workflow는 장애 대응 또는 비교 실행을 위한 수동 백업으로만 유지합니다.
   workflow_dispatch:
 
 permissions:
@@ -28,9 +23,18 @@ jobs:
       - name: 패키지 설치
         run: pip install -r requirements.txt
 
+      - name: Node.js 세팅 (Claude CLI 설치용)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Claude Code CLI 설치
+        run: npm install -g @anthropic-ai/claude-code
+
       - name: 브리핑 에이전트 실행
         env:
           AI_API_KEY: ${{ secrets.AI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
         run: python main.py
 

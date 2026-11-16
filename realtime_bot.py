@@ -12,7 +12,7 @@ try:
 except ImportError:
     pass
 
-from agents.claude_cli import ask_claude, ask_claude_json
+from agents.claude_cli import CodexUnavailable, ask_claude, ask_claude_json
 
 # 환경 변수 세팅
 TEAMS_WEBHOOK_URL = os.environ.get("TEAMS_WEBHOOK_URL")
@@ -421,6 +421,8 @@ def extract_tickers_from_news(headlines):
             return [s for s in data if isinstance(s, dict)]
         print("AI 추출: stocks 배열 없음 → 빈 목록")
         return []
+    except CodexUnavailable:
+        raise
     except Exception as e:
         print(f"AI 추출 실패: {e}")
         return []
@@ -499,15 +501,17 @@ name과 reason은 반드시 한국어로 작성한다.
                 print(f"AI 맥락 정렬 교정: #{i} {old_t} → {new_ticker} ({new_name})")
             out.append({"name": new_name, "ticker": new_ticker, "reason": new_reason})
         return out
+    except CodexUnavailable:
+        raise
     except Exception as e:
         print(f"AI 맥락 정렬 실패: {e} → 원본 유지")
         return stocks
 
 
-def calculate_technical_indicators(ticker):
+def calculate_technical_indicators(ticker, history=None):
     """RSI, MACD, 볼린저 밴드, 일목균형표 종합 지표 계산 (조건 완화)"""
     try:
-        df = yf.Ticker(ticker).history(period="6mo")
+        df = history if history is not None else yf.Ticker(ticker).history(period="6mo")
         if df.empty or len(df) < 52: 
             return None
             

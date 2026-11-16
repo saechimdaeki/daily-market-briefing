@@ -5,6 +5,7 @@ import time
 import requests
 
 from agents.state import MarketBriefingState
+from dashboard_delivery import dashboard_url
 
 GITHUB_PAGES_URL = "https://saechimdaeki.github.io/daily-market-briefing/"
 
@@ -78,6 +79,8 @@ def notify(state: MarketBriefingState) -> dict:
                     ],
                     {"type": "Action.OpenUrl", "title": "📊 프리미엄 웹페이지에서 보기",
                      "url": GITHUB_PAGES_URL},
+                    {"type": "Action.OpenUrl", "title": "트레이딩 데스크 보러가기",
+                     "url": dashboard_url()},
                 ],
             },
         }],
